@@ -10,5 +10,8 @@
     <string name="save_button_text">Create</string>
     <string name="open_tv_text">Filename: </string>
     <string name="open_button_text">Open</string>
+    <!-- I need to re do these strings later when I can see the app -->
+    <string name="save_alert_title">Save TITLE</string>
+    <string name="ro_fail_notice">Couldn\'t write to that destination</string>
 
 </resources>

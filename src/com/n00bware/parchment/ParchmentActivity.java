@@ -24,22 +24,34 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 
-//TODO move .close() statements to finally block
+//TODO move .close() statements to finally blocks
+//nomenclature object prefixes are changing; to claify
+//p ParchmentActivity objects; Content from layout/main.xml
+//s Content from layout/save.xml
+//o Content from layout/open.xml
 
 public class ParchmentActivity extends Activity {
 
+    private final String TAG = "Parchment";
     private final String FILENAME = "filename";
     private final String DIRECTORY = "directory";
     private final String DEFAULT_OPEN_PATH = "/sdcard/parchment/";
     private final String BLANK = "";
     private final String SAVE_MARKER = "saved_text";
-    private String jFilename = new String();
+    private final String LAST_INDEX = "last_index";
+    private String pFilename = new String();
     private String textContainer;
-    private String jDir;
+    private String pDir;
+    private String pContents;
+
+    private final int SAVE = 1;
+    private final int SAVE_AS = 2;
+    private final int OPEN = 3;
+
+    private Dialog openDialog;
+    private Dialog saveDialog;
+    private File pFile;
     private SharedPreferences jSharedPrefs;
-    private int SAVE = 1;
-    private int SAVE_AS = 2;
-    private int OPEN = 3;
 
     @Override
     public void onCreate(Bundle GoVOLS) {
@@ -55,18 +67,18 @@ public class ParchmentActivity extends Activity {
 
         Bundle args = getIntent().getExtras();
         if (args != null) {
-            jFilename = args.getString(FILENAME);
+            pFilename = args.getString(FILENAME);
         }
 
         jSharedPrefs = getPreferences(MODE_PRIVATE);
-        jDir = jSharedPrefs.getString(DIRECTORY, "/");
+        pDir = jSharedPrefs.getString(DIRECTORY, "/");
         isReadOnly();
     }
 
     protected void onPause() {
         super.onPause();
 
-        if (jFilename.equals(BLANK)) {
+        if (pFilename.equals(BLANK)) {
             EditText container = (EditText)findViewById(R.id.jDoc);
             String text = container.getText().toString();
             if (text != null) {
@@ -80,21 +92,17 @@ public class ParchmentActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        if (jFilename.equals(BLANK)) {
-            jContents = jSharedPrefs.getString(SAVE_MARKER, BLANK);
-            EditText contents = (EditText)findViewByID(R.id.jDoc);
-            contents.setText(jContents);
+        if (pFilename.equals(BLANK)) {
+            pContents = jSharedPrefs.getString(SAVE_MARKER, BLANK);
+            EditText contents = (EditText)findViewById(R.id.jDoc);
+            contents.setText(pContents);
         }
     }
 
     private void isReadOnly() {
-        if (jFilename.equals(BLANK)) {
-            return false;
-        }
-
-        jFile = new File(jFilename);
-        if (!jFile.canWrite()) {
-            Toast.makeText(this, FAIL_RO_NOTICE, Toast.LENGTH_SHORT).show();
+        pFile = new File(pFilename);
+        if (!pFile.canWrite()) {
+            Toast.makeText(this, R.string.ro_fail_notice, Toast.LENGTH_SHORT).show();
         }
 
         loadText();
@@ -102,17 +110,17 @@ public class ParchmentActivity extends Activity {
 
     private void loadText() {
         try {
-            byte[] buffer = new byte[(int)jFile.length()];
-            FileInputStream reader = new FileInputStream(jFile);
+            byte[] buffer = new byte[(int)pFile.length()];
+            FileInputStream reader = new FileInputStream(pFile);
             reader.read(buffer);
 
             textContainer = new String(buffer);
             EditText eText = (EditText)findViewById(R.id.jDoc);
             eText.setText(textContainer);
-            setTitle(jFilename);
+            setTitle(pFilename);
             reader.close();
         } catch(IOException e) {
-            Log.d(TAG, "Parsing error while loading " + jFilename);
+            Log.d(TAG, "Parsing error while loading " + pFilename);
         }
     }
 
@@ -120,16 +128,16 @@ public class ParchmentActivity extends Activity {
         try {
             EditText eText = (EditText)findViewById(R.id.jDoc);
             String text = eText.getText().toString();
-            FileWriter fWrite = new FileWriter(jFile, false);
+            FileWriter fWrite = new FileWriter(pFile, false);
             fWrite.write(text);
             fWrite.close();
 
-            String dir = jFilename.substring(0, jFilename.lastIndexOf("/"));
+            String dir = pFilename.substring(0, pFilename.lastIndexOf("/"));
             SharedPreferences.Editor sEdit = jSharedPrefs.edit();
             sEdit.putString(LAST_INDEX, dir);
             sEdit.commit();
         } catch(IOException e) {
-            Log.d(TAG, "Failed to write " + jFilename);
+            Log.d(TAG, "Failed to write " + pFilename);
         }
     }
 
@@ -137,10 +145,10 @@ public class ParchmentActivity extends Activity {
         openDialog = new Dialog(this);
         openDialog.setContentView(R.layout.open);
         openDialog.setTitle("Open file... { full path }");
-        EditText open_filename = (EditText) openDialog.findViewById(R.id.oNewFile);
+        final EditText open_filename = (EditText) openDialog.findViewById(R.id.oNewFile);
 
-        if (jFilename != null) {
-            open_filename.setText(jFilename);
+        if (pFilename != null) {
+            open_filename.setText(pFilename);
         } else {
             open_filename.setText(DEFAULT_OPEN_PATH);
         }
@@ -148,8 +156,8 @@ public class ParchmentActivity extends Activity {
         final Button jButton = (Button) openDialog.findViewById(R.id.oButton);
         jButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                jFilename = open_filename.getText().toString();
-                if (jFilename != null) {
+                pFilename = open_filename.getText().toString();
+                if (pFilename != null) {
                      loadText();
                 }
             }
@@ -161,7 +169,7 @@ public class ParchmentActivity extends Activity {
         saveDialog.setContentView(R.layout.save);
         saveDialog.setTitle("Save as... { full path }");
         EditText filename = (EditText) saveDialog.findViewById(R.id.sNewFile);
-        filename.setText(jDir);
+        filename.setText(pDir);
 
         final Button sButton = (Button) saveDialog.findViewById(R.id.sButton);
         sButton.setOnClickListener(new Button.OnClickListener() {
@@ -174,15 +182,15 @@ public class ParchmentActivity extends Activity {
     }
 
     private void saveAs() {
-        EditText fname = (EditText) saveDialog.findViewById(R.id.jNewFile);
+        EditText fname = (EditText) saveDialog.findViewById(R.id.sNewFile);
         String filename = fname.getText().toString();
-        String newFile = new File(filename);
+        File newFile = new File(filename);
         if (!newFile.canWrite()) {
-            Toast.makeToast(this, "We do not have write permission for " + filename, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "We do not have write permission for " + filename, Toast.LENGTH_LONG).show();
             saveDialog.dismiss();
             return;
         }
-        jFile = newFile;
+        pFile = newFile;
 
         if (newFile.isFile()) {
             new AlertDialog.Builder(this)
@@ -193,7 +201,7 @@ public class ParchmentActivity extends Activity {
                     writeFile();
                 }
             })
-            .setNegitiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whatButton){
                     saveDialog.dismiss();
                 }
@@ -213,7 +221,7 @@ public class ParchmentActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemid()) {
+        switch (item.getItemId()) {
             case SAVE:
                 writeFile();
                 break;
