@@ -37,7 +37,7 @@ public class ParchmentActivity extends Activity {
     private final String TAG = "Parchment";
     private final String FILENAME = "filename";
     private final String DIRECTORY = "directory";
-    private final String DEFAULT_OPEN_PATH = "/sdcard/parchment/";
+    private final String DEFAULT_OPEN_PATH = "/sdcard/parchment/parchment_test";
     private final String BLANK = "";
     private final String SAVE_MARKER = "saved_text";
     private final String LAST_INDEX = "last_index";
@@ -50,8 +50,6 @@ public class ParchmentActivity extends Activity {
     private final int SAVE_AS = 2;
     private final int OPEN = 3;
 
-    //private Button oButton;
-    //private Button sButton;
     private Dialog openDialog;
     private Dialog saveDialog;
     private File pFile;
@@ -66,6 +64,11 @@ public class ParchmentActivity extends Activity {
         File parchment_path = new File(DEFAULT_OPEN_PATH);
         if (!parchment_path.isDirectory()) {
             parchment_path.getParentFile().mkdir();
+        }
+        if (parchment_path == null) {
+            Log.d(TAG, "shit nulled return from parchment_path");
+        } else {
+            Log.d(TAG, "parchment_path returned " + parchment_path.getName());
         }
 
         Bundle args = getIntent().getExtras();
@@ -169,11 +172,10 @@ public class ParchmentActivity extends Activity {
         oButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 pFilename = open_filename.getText().toString();
-                if (pFilename != null) {
-                     loadText();
-                }
+                loadText();
             }
         });
+        openDialog.show();
     }
 
     private void savePrompt() {
