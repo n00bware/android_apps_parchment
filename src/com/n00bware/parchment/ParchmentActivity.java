@@ -63,12 +63,10 @@ public class ParchmentActivity extends Activity {
         setContentView(R.layout.main);
         Log.d(TAG, "onCreate loaded layout");
 
-/*        File parchment_path = new File(DEFAULT_OPEN_PATH);
-        boolean parchment = parchment_path.isDirectory();
-        if (!parchment) {
-            //TODO: FIX
-            //parchment_path.getParentFile().mkDir();
-        } */
+        File parchment_path = new File(DEFAULT_OPEN_PATH);
+        if (!parchment_path.isDirectory()) {
+            parchment_path.getParentFile().mkdir();
+        }
 
         Bundle args = getIntent().getExtras();
         if (args != null) {
@@ -113,10 +111,11 @@ public class ParchmentActivity extends Activity {
     private void isReadOnly() {
         Log.d(TAG, "isReadOnly");
         pFile = new File(pFilename);
-        if (!pFile.canWrite()) {
-            Toast.makeText(this, R.string.ro_fail_notice, Toast.LENGTH_SHORT).show();
+        if (pFile != null) {
+            if (!pFile.canWrite()) {
+                Toast.makeText(this, R.string.ro_fail_notice, Toast.LENGTH_SHORT).show();
+            }
         }
-
         loadText();
     }
 
