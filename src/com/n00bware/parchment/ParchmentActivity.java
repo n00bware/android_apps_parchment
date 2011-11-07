@@ -24,11 +24,13 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 
-//TODO move .close() statements to finally blocks
-//nomenclature object prefixes are changing; to claify
-//p ParchmentActivity objects; Content from layout/main.xml
-//s Content from layout/save.xml
-//o Content from layout/open.xml
+/* 
+ * TODO move .close() statements to finally blocks
+ * nomenclature object prefixes are changing; to claify
+ *p ParchmentActivity objects; Content from layout/main.xml
+ *s Content from layout/save.xml
+ *o Content from layout/open.xml
+ */
 
 public class ParchmentActivity extends Activity {
 
@@ -48,30 +50,39 @@ public class ParchmentActivity extends Activity {
     private final int SAVE_AS = 2;
     private final int OPEN = 3;
 
+    //private Button oButton;
+    //private Button sButton;
     private Dialog openDialog;
     private Dialog saveDialog;
     private File pFile;
-    private SharedPreferences jSharedPrefs;
+    private SharedPreferences pSharedPrefs;
 
     @Override
-    public void onCreate(Bundle GoVOLS) {
-        super.onCreate(GoVOLS);
+    public void onCreate(Bundle icicle) {
+        super.onCreate(icicle);
         setContentView(R.layout.main);
+        Log.d(TAG, "onCreate loaded layout");
 
-        File parchment_path = new File(DEFAULT_OPEN_PATH);
+/*        File parchment_path = new File(DEFAULT_OPEN_PATH);
         boolean parchment = parchment_path.isDirectory();
         if (!parchment) {
             //TODO: FIX
             //parchment_path.getParentFile().mkDir();
-        }
+        } */
 
         Bundle args = getIntent().getExtras();
         if (args != null) {
             pFilename = args.getString(FILENAME);
         }
+        Log.d(TAG, "args");
 
-        jSharedPrefs = getPreferences(MODE_PRIVATE);
-        pDir = jSharedPrefs.getString(DIRECTORY, "/");
+        pSharedPrefs = getPreferences(MODE_PRIVATE);
+        //TODO: best to start @ /# or sdcard/parchment/#
+        pDir = pSharedPrefs.getString(DIRECTORY, "/");
+        /*
+         * TODO: read only is important but we should look into
+         * allowing su save abilities
+         */
         isReadOnly();
     }
 
@@ -79,10 +90,10 @@ public class ParchmentActivity extends Activity {
         super.onPause();
 
         if (pFilename.equals(BLANK)) {
-            EditText container = (EditText)findViewById(R.id.jDoc);
+            EditText container = (EditText)findViewById(R.id.pDoc);
             String text = container.getText().toString();
             if (text != null) {
-                SharedPreferences.Editor prefEditor = jSharedPrefs.edit();
+                SharedPreferences.Editor prefEditor = pSharedPrefs.edit();
                 prefEditor.putString(SAVE_MARKER, text);
                 prefEditor.commit();
             }
@@ -93,13 +104,14 @@ public class ParchmentActivity extends Activity {
         super.onResume();
 
         if (pFilename.equals(BLANK)) {
-            pContents = jSharedPrefs.getString(SAVE_MARKER, BLANK);
-            EditText contents = (EditText)findViewById(R.id.jDoc);
+            pContents = pSharedPrefs.getString(SAVE_MARKER, BLANK);
+            EditText contents = (EditText)findViewById(R.id.pDoc);
             contents.setText(pContents);
         }
     }
 
     private void isReadOnly() {
+        Log.d(TAG, "isReadOnly");
         pFile = new File(pFilename);
         if (!pFile.canWrite()) {
             Toast.makeText(this, R.string.ro_fail_notice, Toast.LENGTH_SHORT).show();
@@ -110,12 +122,13 @@ public class ParchmentActivity extends Activity {
 
     private void loadText() {
         try {
+            Log.d(TAG, "loadText");
             byte[] buffer = new byte[(int)pFile.length()];
             FileInputStream reader = new FileInputStream(pFile);
             reader.read(buffer);
 
             textContainer = new String(buffer);
-            EditText eText = (EditText)findViewById(R.id.jDoc);
+            EditText eText = (EditText)findViewById(R.id.pDoc);
             eText.setText(textContainer);
             setTitle(pFilename);
             reader.close();
@@ -126,14 +139,14 @@ public class ParchmentActivity extends Activity {
 
     private void writeFile() {
         try {
-            EditText eText = (EditText)findViewById(R.id.jDoc);
+            EditText eText = (EditText)findViewById(R.id.pDoc);
             String text = eText.getText().toString();
             FileWriter fWrite = new FileWriter(pFile, false);
             fWrite.write(text);
             fWrite.close();
 
             String dir = pFilename.substring(0, pFilename.lastIndexOf("/"));
-            SharedPreferences.Editor sEdit = jSharedPrefs.edit();
+            SharedPreferences.Editor sEdit = pSharedPrefs.edit();
             sEdit.putString(LAST_INDEX, dir);
             sEdit.commit();
         } catch(IOException e) {
@@ -153,8 +166,8 @@ public class ParchmentActivity extends Activity {
             open_filename.setText(DEFAULT_OPEN_PATH);
         }
 
-        final Button jButton = (Button) openDialog.findViewById(R.id.oButton);
-        jButton.setOnClickListener(new Button.OnClickListener() {
+        final Button oButton = (Button) openDialog.findViewById(R.id.oButton);
+        oButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 pFilename = open_filename.getText().toString();
                 if (pFilename != null) {
