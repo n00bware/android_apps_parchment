@@ -192,6 +192,7 @@ public class ParchmentActivity extends Activity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        trustButVerify();
     }
 
     private void open() {
@@ -275,6 +276,35 @@ public class ParchmentActivity extends Activity {
             Log.d(TAG, "if not a file already");
             saveDialog.dismiss();
             writeFile();
+        }
+    }
+
+    private void trustButVerify() {
+        File trust = new File(pFilename);
+        StringBuilder pass = new StringBuilder();
+        StringBuilder verify = new StringBuilder();
+        pass = null;
+        verify = null;
+        if (trust.exists() && trust.canWrite() && trust.canRead()) {
+            Log.d(TAG, "Trust but verify ... all good here");
+            pass.append(String.format("%s exists with read/write permissions", pFilename));
+        }
+        if (trust.exists()) {
+            Log.d(TAG, String.format("Trust but verify ... '%s' does in fact exist", pFilename));
+            verify.append("exists ");
+        }
+        if (trust.canRead()) {
+            Log.d(TAG, "Trust but verify ... we can read " + pFilename);
+            verify.append("Read/");
+        }
+        if (trust.canWrite()) {
+            Log.d(TAG, "Trust but verify ... we can write " + pFilename);
+            verify.append("Write");
+        }
+        if (pass != null) {
+            Toast.makeText(this, String.format("%s file %s", pFilename, trust.toString()), Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, verify.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
