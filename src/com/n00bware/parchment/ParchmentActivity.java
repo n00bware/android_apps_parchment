@@ -61,7 +61,6 @@ public class ParchmentActivity extends Activity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.main);
-        Log.d(TAG, "onCreate loaded layout");
 
         File parchment_path = new File(DEFAULT_OPEN_PATH);
         if (!parchment_path.isDirectory()) {
@@ -77,10 +76,12 @@ public class ParchmentActivity extends Activity {
         if (args != null) {
             pFilename = args.getString(FILENAME);
             setTitle(pFilename);
+            Log.d(TAG, "args: " + pFilename);
         } else {
             setTitle(R.string.default_title);
+            Log.d(TAG, "args: null");
         }
-        Log.d(TAG, "args");
+
 
         if (!root.canWrite()) {Log.d(TAG, "sdcard is not writable");} else {Log.d(TAG, "sdcard is writable");}
 
@@ -170,12 +171,16 @@ public class ParchmentActivity extends Activity {
         try {
             EditText eText = (EditText)findViewById(R.id.pDoc);
             String text = eText.getText().toString();
-            FileWriter fWrite = new FileWriter(pFile, false);
+            FileWriter fWrite = new FileWriter(pFile);
             Log.d(TAG, String.format("text we are attempting to write { %s }", text));
-            fWrite.write(text);
-
-            fWrite.flush();
-            fWrite.close();
+            try {
+                fWrite.write(text);
+                fWrite.flush();
+                fWrite.close();
+            } catch (IOException IOe) {
+                Log.d(TAG, "IOException while FileWriter was writing file");
+                IOe.printStackTrace();
+            }
 
             String dir = pFilename.substring(0, pFilename.lastIndexOf("/"));
             Log.d(TAG, String.format("LAST_INDEX { %s } dir { %s }", LAST_INDEX, dir));
@@ -184,6 +189,8 @@ public class ParchmentActivity extends Activity {
             sEdit.commit();
         } catch(IOException e) {
             Log.d(TAG, "Failed to write " + pFilename);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -235,19 +242,21 @@ public class ParchmentActivity extends Activity {
         String filename = fname.getText().toString();
         File newFile = new File(Environment.getExternalStorageDirectory() + "/" + filename);
         String debug_filename = newFile.getAbsolutePath();
-        if (newFile.exists()) {Log.d(TAG, "saveAs newFile exists");}
-        if (newFile.canWrite()) {Log.d(TAG, "saveAs newFile canWrite=true");}
-        if (newFile.canRead()) {Log.d(TAG, "saveAs newFile canRead=true");}
+        if (!newFile.exists()) {Log.d(TAG, "saveAs newFile !exists");}
+        if (!newFile.canWrite()) {Log.d(TAG, "saveAs newFile canWrite=false");}
+        if (!newFile.canRead()) {Log.d(TAG, "saveAs newFile canRead=false");}
         Log.d(TAG, "the file we are attempting to save is " + debug_filename);
-        if (!newFile.canWrite()) {
+
+/*        if (!newFile.canWrite()) {
             Toast.makeText(this, "We do not have write permission for " + filename, Toast.LENGTH_LONG).show();
             saveDialog.dismiss();
             return;
-        }
+        }*/
 
         pFile = newFile;
+        Log.d(TAG, pFile.getAbsolutePath());
 
-        if (newFile.isFile()) {
+        if (!newFile.isFile()) {
             new AlertDialog.Builder(this)
             .setTitle(R.string.save_alert_title)
             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -262,6 +271,10 @@ public class ParchmentActivity extends Activity {
                 }
             })
             .show();
+        } else {
+            Log.d(TAG, "if not a file already");
+            saveDialog.dismiss();
+            writeFile();
         }
     }
 
