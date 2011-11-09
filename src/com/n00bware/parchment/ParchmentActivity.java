@@ -54,6 +54,7 @@ public class ParchmentActivity extends Activity {
     private Dialog openDialog;
     private Dialog saveDialog;
     private File pFile;
+    private File root = Environment.getExternalStorageDirectory();
     private SharedPreferences pSharedPrefs;
 
     @Override
@@ -80,6 +81,8 @@ public class ParchmentActivity extends Activity {
             setTitle(R.string.default_title);
         }
         Log.d(TAG, "args");
+
+        if (!root.canWrite()) {Log.d(TAG, "sdcard is not writable");} else {Log.d(TAG, "sdcard is writable");}
 
         pSharedPrefs = getPreferences(MODE_PRIVATE);
         //TODO: best to start @ /# or sdcard/parchment/#
@@ -230,12 +233,18 @@ public class ParchmentActivity extends Activity {
     private void saveAs() {
         EditText fname = (EditText) saveDialog.findViewById(R.id.sNewFile);
         String filename = fname.getText().toString();
-        File newFile = new File(filename);
+        File newFile = new File(Environment.getExternalStorageDirectory() + "/" + filename);
+        String debug_filename = newFile.getAbsolutePath();
+        if (newFile.exists()) {Log.d(TAG, "saveAs newFile exists");}
+        if (newFile.canWrite()) {Log.d(TAG, "saveAs newFile canWrite=true");}
+        if (newFile.canRead()) {Log.d(TAG, "saveAs newFile canRead=true");}
+        Log.d(TAG, "the file we are attempting to save is " + debug_filename);
         if (!newFile.canWrite()) {
             Toast.makeText(this, "We do not have write permission for " + filename, Toast.LENGTH_LONG).show();
             saveDialog.dismiss();
             return;
         }
+
         pFile = newFile;
 
         if (newFile.isFile()) {

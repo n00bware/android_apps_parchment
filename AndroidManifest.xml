@@ -3,7 +3,7 @@
       package="com.n00bware.parchment"
       android:versionCode="1"
       android:versionName="@string/version_name">
-    <uses-sdk android:minSdkVersion="10"></uses-sdk>
+    <uses-sdk android:minSdkVersion="4"></uses-sdk>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application android:icon="@drawable/parchment"
