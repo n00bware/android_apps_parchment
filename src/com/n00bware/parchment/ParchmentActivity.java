@@ -9,6 +9,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Editable;
 import android.util.Log;
 import android.view.Menu;
@@ -68,12 +69,15 @@ public class ParchmentActivity extends Activity {
         if (parchment_path == null) {
             Log.d(TAG, "shit nulled return from parchment_path");
         } else {
-            Log.d(TAG, "parchment_path returned " + parchment_path.getName());
+            Log.d(TAG, "parchment_path returned " + parchment_path.getParentFile().getName());
         }
 
         Bundle args = getIntent().getExtras();
         if (args != null) {
             pFilename = args.getString(FILENAME);
+            setTitle(pFilename);
+        } else {
+            setTitle(R.string.default_title);
         }
         Log.d(TAG, "args");
 
@@ -114,11 +118,30 @@ public class ParchmentActivity extends Activity {
     private void isReadOnly() {
         Log.d(TAG, "isReadOnly");
         pFile = new File(pFilename);
-        if (pFile != null) {
-            if (!pFile.canWrite()) {
-                Toast.makeText(this, R.string.ro_fail_notice, Toast.LENGTH_SHORT).show();
-            }
+
+        if (pFile.canWrite()) {Log.d(TAG, "canWrite() true");}
+        if (pFile.exists()) {Log.d(TAG, "exists() true");}
+        if (pFile.canRead()) {Log.d(TAG, "canRead() true");}
+        String file_path = pFile.getAbsolutePath();
+        Log.d(TAG, String.format("file path { %s }", file_path));
+        Log.d(TAG, pFile.toString());
+
+        boolean mExternalStorageAvailable = false;
+        boolean mExternalStorageWriteable = false;
+        String state = Environment.getExternalStorageState();
+
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            mExternalStorageAvailable = mExternalStorageWriteable = true;
+            Log.d(TAG, "sdcard mounted");
+        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            mExternalStorageAvailable = true;
+            mExternalStorageWriteable = false;
+            Log.d(TAG, "sdcard readonly");
+        } else {
+            mExternalStorageAvailable = mExternalStorageWriteable = false;
+            Log.d(TAG, "epic failure");
         }
+
         loadText();
     }
 
@@ -133,6 +156,7 @@ public class ParchmentActivity extends Activity {
             EditText eText = (EditText)findViewById(R.id.pDoc);
             eText.setText(textContainer);
             setTitle(pFilename);
+            Log.d(TAG, eText.getText().toString());
             reader.close();
         } catch(IOException e) {
             Log.d(TAG, "Parsing error while loading " + pFilename);
@@ -144,10 +168,14 @@ public class ParchmentActivity extends Activity {
             EditText eText = (EditText)findViewById(R.id.pDoc);
             String text = eText.getText().toString();
             FileWriter fWrite = new FileWriter(pFile, false);
+            Log.d(TAG, String.format("text we are attempting to write { %s }", text));
             fWrite.write(text);
+
+            fWrite.flush();
             fWrite.close();
 
             String dir = pFilename.substring(0, pFilename.lastIndexOf("/"));
+            Log.d(TAG, String.format("LAST_INDEX { %s } dir { %s }", LAST_INDEX, dir));
             SharedPreferences.Editor sEdit = pSharedPrefs.edit();
             sEdit.putString(LAST_INDEX, dir);
             sEdit.commit();
@@ -161,6 +189,7 @@ public class ParchmentActivity extends Activity {
         openDialog.setContentView(R.layout.open);
         openDialog.setTitle("Open file... { full path }");
         final EditText open_filename = (EditText) openDialog.findViewById(R.id.oNewFile);
+        open_filename.setSingleLine();
 
         if (pFilename != null) {
             open_filename.setText(pFilename);
@@ -172,7 +201,9 @@ public class ParchmentActivity extends Activity {
         oButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 pFilename = open_filename.getText().toString();
-                loadText();
+                Log.d(TAG, pFilename);
+                isReadOnly();
+                openDialog.dismiss();
             }
         });
         openDialog.show();
@@ -183,6 +214,7 @@ public class ParchmentActivity extends Activity {
         saveDialog.setContentView(R.layout.save);
         saveDialog.setTitle("Save as... { full path }");
         EditText filename = (EditText) saveDialog.findViewById(R.id.sNewFile);
+        filename.setSingleLine();
         filename.setText(pDir);
 
         final Button sButton = (Button) saveDialog.findViewById(R.id.sButton);

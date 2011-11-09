@@ -2,6 +2,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <string name="app_name">Parchment</string>
+    <string name="default_title">Parchment by n00bware</string>
     <string name="version_name">alpha</string>
     <string name="alertTitle">Overwrite?</string>
     <string name="ok">ok</string>
