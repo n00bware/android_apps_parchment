@@ -182,7 +182,7 @@ public class ParchmentActivity extends Activity {
                 IOe.printStackTrace();
             }
 
-            String dir = pFilename.substring(0, pFilename.lastIndexOf("/"));
+            String dir = LAST_INDEX;
             Log.d(TAG, String.format("LAST_INDEX { %s } dir { %s }", LAST_INDEX, dir));
             SharedPreferences.Editor sEdit = pSharedPrefs.edit();
             sEdit.putString(LAST_INDEX, dir);
@@ -280,32 +280,21 @@ public class ParchmentActivity extends Activity {
     }
 
     private void trustButVerify() {
-        File trust = new File(pFilename);
-        StringBuilder pass = new StringBuilder();
-        StringBuilder verify = new StringBuilder();
-        pass = null;
-        verify = null;
+        String pFile_path = pFile.getAbsolutePath();
+        File trust = new File(pFile_path);
+        Log.d(TAG, String.format("pFile {%s} pFilename {%s}", pFile_path, pFilename));
         if (trust.exists() && trust.canWrite() && trust.canRead()) {
             Log.d(TAG, "Trust but verify ... all good here");
-            pass.append(String.format("%s exists with read/write permissions", pFilename));
-        }
+        } else {Log.d(TAG, "Trust but verify ...failed combined checks");}
         if (trust.exists()) {
-            Log.d(TAG, String.format("Trust but verify ... '%s' does in fact exist", pFilename));
-            verify.append("exists ");
-        }
+            Log.d(TAG, String.format("Trust but verify ... '%s' does in fact exist", pFile_path));
+        } else {Log.d(TAG, "Trust but verify ... failed exists()");}
         if (trust.canRead()) {
-            Log.d(TAG, "Trust but verify ... we can read " + pFilename);
-            verify.append("Read/");
-        }
+            Log.d(TAG, "Trust but verify ... we can read " + pFile_path);
+        } else {Log.d(TAG, "Trust but verify ...failed canRead()");}
         if (trust.canWrite()) {
-            Log.d(TAG, "Trust but verify ... we can write " + pFilename);
-            verify.append("Write");
-        }
-        if (pass != null) {
-            Toast.makeText(this, String.format("%s file %s", pFilename, trust.toString()), Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(this, verify.toString(), Toast.LENGTH_LONG).show();
-        }
+            Log.d(TAG, "Trust but verify ... we can write " + pFile_path);
+        } else {Log.d(TAG, "Trust but verify ... failed canWrite()");}
     }
 
     @Override
