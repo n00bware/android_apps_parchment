@@ -54,6 +54,8 @@ public class ParchmentActivity extends Activity {
     private final int SAVE_AS = 3;
     private final int OPEN = 4;
 
+    private boolean mIsNewFile = false;
+
     private Dialog saveDialog;
     private Dialog openDialog;
     private File pFile;
@@ -63,6 +65,11 @@ public class ParchmentActivity extends Activity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        setTitle(R.string.default_title);
+        setContentView(R.layout.main);
+
+        final EditText old_text = (EditText)findViewById(R.id.pDoc);
+        final String pdoc_txt = old_text.getText().toString();
 
         try {
             String titleHolder = pFile.getAbsolutePath();
@@ -219,7 +226,6 @@ public class ParchmentActivity extends Activity {
         trustButVerify();
     }
 
-    /* TODO finish */
     private void newFile() {
         final EditText old_text = (EditText)findViewById(R.id.pDoc);
         String pdoc_txt = old_text.getText().toString();
@@ -229,11 +235,11 @@ public class ParchmentActivity extends Activity {
             .setTitle(R.string.new_file_title)
             .setPositiveButton(R.string.save_button_text, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whatButton) {
+                    mIsNewFile = true;
                     savePrompt();
-                    old_text.setText(BLANK);
                 }
             })
-            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            .setNegativeButton(R.string.clear, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whatButton) {
                     old_text.setText(BLANK);
                 }
@@ -287,6 +293,8 @@ public class ParchmentActivity extends Activity {
 
     private void saveAs() {
         EditText fname = (EditText) saveDialog.findViewById(R.id.sNewFile);
+        final EditText old_text = (EditText)findViewById(R.id.pDoc);
+        final String pdoc_txt = old_text.getText().toString();
         String filename = fname.getText().toString();
         File newFile = new File(Environment.getExternalStorageDirectory() + "/" + filename);
         String debug_filename = newFile.getAbsolutePath();
@@ -304,6 +312,9 @@ public class ParchmentActivity extends Activity {
             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whatButton) {
                     saveDialog.dismiss();
+                    if (mIsNewFile) {
+                        old_text.setText(BLANK);
+                    }
                     writeFile();
                 }
             })
@@ -362,19 +373,6 @@ public class ParchmentActivity extends Activity {
                 break;
             case OPEN:
                 open();
-        }
-    return false;
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        EditText container = (EditText)findViewById(R.id.pDoc);
-        String text = container.getText().toString();
-        if (text != null) {
-            SharedPreferences.Editor prefEditor = pSharedPrefs.edit();
-            prefEditor.putString(SAVE_MARKER, text);
-            prefEditor.commit();
-            return true;
         }
     return false;
     }
