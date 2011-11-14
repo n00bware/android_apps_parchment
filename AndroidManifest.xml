@@ -14,8 +14,10 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-                <data android:host="com.n00bware.parchment" />
-                <data android:mimeType="*" />
+                <data android:scheme="file" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern="*" />
+                <data android:host="*" />
             </intent-filter>
         </activity>
 
