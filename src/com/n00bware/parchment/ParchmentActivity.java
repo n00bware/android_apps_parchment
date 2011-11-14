@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -62,8 +63,7 @@ public class ParchmentActivity extends Activity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        setTitle(R.string.default_title);
-        setContentView(R.layout.main);
+
         try {
             String titleHolder = pFile.getAbsolutePath();
             if (titleHolder != null) {
@@ -72,8 +72,6 @@ public class ParchmentActivity extends Activity {
         } catch (NullPointerException npe) {
             npe.printStackTrace();
         }
-
-
 
         File parchment_path = new File(DEFAULT_OPEN_PATH);
         if (!parchment_path.isDirectory()) {
@@ -95,7 +93,6 @@ public class ParchmentActivity extends Activity {
             Log.d(TAG, "args: null");
         }
 
-
         if (!root.canWrite()) {Log.d(TAG, "sdcard is not writable");} else {Log.d(TAG, "sdcard is writable");}
 
         pSharedPrefs = getPreferences(MODE_PRIVATE);
@@ -106,6 +103,20 @@ public class ParchmentActivity extends Activity {
          * allowing su save abilities
          */
         isReadOnly();
+    }
+
+    /* onStart should be called when orentation changes hopefully now we won't lose data from TextEdits this way */
+    @Override
+    public void onStart(){
+        super.onStart();
+        setTitle(R.string.default_title);
+        setContentView(R.layout.main);
+
+        pContents = pSharedPrefs.getString(SAVE_MARKER, BLANK);
+        if (!pContents.equals(BLANK)) {
+            EditText contents = (EditText)findViewById(R.id.pDoc);
+            contents.setText(pContents);
+        }
     }
 
     protected void onPause() {
@@ -351,6 +362,19 @@ public class ParchmentActivity extends Activity {
                 break;
             case OPEN:
                 open();
+        }
+    return false;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        EditText container = (EditText)findViewById(R.id.pDoc);
+        String text = container.getText().toString();
+        if (text != null) {
+            SharedPreferences.Editor prefEditor = pSharedPrefs.edit();
+            prefEditor.putString(SAVE_MARKER, text);
+            prefEditor.commit();
+            return true;
         }
     return false;
     }
