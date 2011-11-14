@@ -315,6 +315,7 @@ public class ParchmentActivity extends Activity {
                     if (mIsNewFile) {
                         old_text.setText(BLANK);
                     }
+                    mIsNewFile = false;
                     writeFile();
                 }
             })
