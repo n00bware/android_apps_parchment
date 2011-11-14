@@ -12,7 +12,9 @@
     <string name="open_tv_text">Filename: </string>
     <string name="open_button_text">Open</string>
     <!-- I need to re do these strings later when I can see the app -->
-    <string name="save_alert_title">Save TITLE</string>
+    <string name="save_alert_title">Save as %s</string>
     <string name="ro_fail_notice">Couldn\'t write to that destination</string>
+    <string name="overwrite_warning">Warning! Overwrite?</string>
+    <string name="new_file_title">Make new file?</string>
 
 </resources>

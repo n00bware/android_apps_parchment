@@ -42,15 +42,18 @@ public class ParchmentActivity extends Activity {
     private final String BLANK = "";
     private final String SAVE_MARKER = "saved_text";
     private final String LAST_INDEX = "last_index";
+    private final String SAVE_ALERT_TITLE = "Save as %s";
     private String pFilename = new String();
     private String textContainer;
     private String pDir;
     private String pContents;
 
-    private final int SAVE = 1;
-    private final int SAVE_AS = 2;
-    private final int OPEN = 3;
+    private final int NEW = 1;
+    private final int SAVE = 2;
+    private final int SAVE_AS = 3;
+    private final int OPEN = 4;
 
+    private Dialog newDialog;
     private Dialog openDialog;
     private Dialog saveDialog;
     private File pFile;
@@ -195,6 +198,42 @@ public class ParchmentActivity extends Activity {
         trustButVerify();
     }
 
+    /* TODO finish */
+    private void newFile() {
+        final EditText old_text = (EditText)findViewById(R.id.pDoc);
+        String pdoc_txt = old_text.getText().toString();
+        if (!pdoc_txt.equals(BLANK)) {
+            newDialog = new Dialog(this);
+            newDialog.setContentView(R.layout.save);
+
+            final EditText save_new_file = (EditText) newDialog.findViewById(R.id.sNewFile);
+            save_new_file.setSingleLine();
+
+
+            newDialog.setTitle(R.string.overwrite_warning);
+            Log.d(TAG, pdoc_txt);
+            save_new_file.setText(pFilename);
+            new AlertDialog.Builder(this)
+            .setTitle(R.string.new_file_title)
+            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whatButton) {
+                    if (!save_new_file.equals(BLANK)) {
+                        newDialog.dismiss();
+                        writeFile();
+                    }
+                }
+            })
+            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whatButton) {
+                    newDialog.dismiss();
+                    old_text.setText(BLANK);
+                }
+            })
+            .show();
+        }
+
+    }
+
     private void open() {
         openDialog = new Dialog(this);
         openDialog.setContentView(R.layout.open);
@@ -248,18 +287,12 @@ public class ParchmentActivity extends Activity {
         if (!newFile.canRead()) {Log.d(TAG, "saveAs newFile canRead=false");}
         Log.d(TAG, "the file we are attempting to save is " + debug_filename);
 
-/*        if (!newFile.canWrite()) {
-            Toast.makeText(this, "We do not have write permission for " + filename, Toast.LENGTH_LONG).show();
-            saveDialog.dismiss();
-            return;
-        }*/
-
         pFile = newFile;
         Log.d(TAG, pFile.getAbsolutePath());
 
         if (!newFile.isFile()) {
             new AlertDialog.Builder(this)
-            .setTitle(R.string.save_alert_title)
+            .setTitle(String.format(SAVE_ALERT_TITLE, pFile.getAbsolutePath()))
             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whatButton) {
                     saveDialog.dismiss();
@@ -267,7 +300,7 @@ public class ParchmentActivity extends Activity {
                 }
             })
             .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whatButton){
+                public void onClick(DialogInterface dialog, int whatButton) {
                     saveDialog.dismiss();
                 }
             })
@@ -300,6 +333,7 @@ public class ParchmentActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean pick = super.onCreateOptionsMenu(menu);
+        menu.add(0, NEW, 0, "New").setIcon(R.drawable.new_file);
         menu.add(0, SAVE, 0, "Save").setIcon(R.drawable.save);
         menu.add(0, SAVE_AS, 0, "Save as").setIcon(R.drawable.save_as);
         menu.add(0, OPEN, 0, "Open").setIcon(R.drawable.open);
@@ -309,6 +343,9 @@ public class ParchmentActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case NEW:
+                newFile();
+                break;
             case SAVE:
                 writeFile();
                 break;
