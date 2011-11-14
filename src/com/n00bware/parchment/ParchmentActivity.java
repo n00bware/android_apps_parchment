@@ -53,9 +53,8 @@ public class ParchmentActivity extends Activity {
     private final int SAVE_AS = 3;
     private final int OPEN = 4;
 
-    private Dialog newDialog;
-    private Dialog openDialog;
     private Dialog saveDialog;
+    private Dialog openDialog;
     private File pFile;
     private File root = Environment.getExternalStorageDirectory();
     private SharedPreferences pSharedPrefs;
@@ -63,7 +62,18 @@ public class ParchmentActivity extends Activity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        setTitle(R.string.default_title);
         setContentView(R.layout.main);
+        try {
+            String titleHolder = pFile.getAbsolutePath();
+            if (titleHolder != null) {
+                setTitle(titleHolder);
+            }
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+
+
 
         File parchment_path = new File(DEFAULT_OPEN_PATH);
         if (!parchment_path.isDirectory()) {
@@ -202,36 +212,23 @@ public class ParchmentActivity extends Activity {
     private void newFile() {
         final EditText old_text = (EditText)findViewById(R.id.pDoc);
         String pdoc_txt = old_text.getText().toString();
+
         if (!pdoc_txt.equals(BLANK)) {
-            newDialog = new Dialog(this);
-            newDialog.setContentView(R.layout.save);
-
-            final EditText save_new_file = (EditText) newDialog.findViewById(R.id.sNewFile);
-            save_new_file.setSingleLine();
-
-
-            newDialog.setTitle(R.string.overwrite_warning);
-            Log.d(TAG, pdoc_txt);
-            save_new_file.setText(pFilename);
             new AlertDialog.Builder(this)
             .setTitle(R.string.new_file_title)
-            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            .setPositiveButton(R.string.save_button_text, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whatButton) {
-                    if (!save_new_file.equals(BLANK)) {
-                        newDialog.dismiss();
-                        writeFile();
-                    }
+                    savePrompt();
+                    old_text.setText(BLANK);
                 }
             })
             .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whatButton) {
-                    newDialog.dismiss();
                     old_text.setText(BLANK);
                 }
             })
             .show();
         }
-
     }
 
     private void open() {

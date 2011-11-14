@@ -14,10 +14,12 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-                <data android:scheme="file" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.GET_CONTENT" />
+                <category android:name="android.intent.category.OPENABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="*/*" />
-                <data android:pathPattern="*" />
-                <data android:host="*" />
             </intent-filter>
         </activity>
 
