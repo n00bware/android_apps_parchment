@@ -255,6 +255,7 @@ public class ParchmentActivity extends Activity {
         openDialog.setTitle("Open file... { full path }");
         final EditText open_filename = (EditText) openDialog.findViewById(R.id.oNewFile);
         open_filename.setSingleLine();
+        open_filename.setText(pDir);
 
         if (pFilename != null) {
             open_filename.setText(pFilename);
