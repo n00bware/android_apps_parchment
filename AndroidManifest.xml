@@ -19,7 +19,10 @@
                 <action android:name="android.intent.action.GET_CONTENT" />
                 <category android:name="android.intent.category.OPENABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="*/*" />
+                <data android:mimeType="text/*" />
+                <data android:mimeType="application/x-javascript" />
+                <data android:mimeType="application/x-perl" />
+                <data android:mimeType="application/x-sh" />
             </intent-filter>
         </activity>
 
