@@ -242,6 +242,7 @@ public class ParchmentActivity extends Activity {
             .setNegativeButton(R.string.clear, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whatButton) {
                     old_text.setText(BLANK);
+                    setTitle(R.string.default_title);
                 }
             })
             .show();
@@ -323,9 +324,6 @@ public class ParchmentActivity extends Activity {
             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whatButton) {
                     saveDialog.dismiss();
-                    if (mIsNewFile) {
-                        old_text.setText(BLANK);
-                    }
                     mIsNewFile = false;
                     writeFile();
                 }
@@ -346,15 +344,23 @@ public class ParchmentActivity extends Activity {
     }
 
     private void trustButVerify() {
+        EditText old_text = (EditText)findViewById(R.id.pDoc);
         String pFile_path = pFile.getAbsolutePath();
         File trust = new File(pFile_path);
         Log.d(TAG, String.format("pFile {%s} pFilename {%s}", pFile_path, pFilename));
         if (trust.exists() && trust.canWrite() && trust.canRead()) {
             Log.d(TAG, "Trust but verify ... all good here");
             Toast.makeText(getApplicationContext(), String.format("%s has been saved", pFile_path), Toast.LENGTH_SHORT).show();
+            setTitle(pFile_path);
+            if (mIsNewFile) {
+                old_text.setText(BLANK);
+            }
+            mIsNewFile = false;
         } else {
+            mIsNewFile = false;
             Log.d(TAG, "Trust but verify ...failed combined checks");
             Toast.makeText(getApplicationContext(), String.format("%s has not been save", pFile_path), Toast.LENGTH_SHORT).show();
+            setTitle(R.string.default_title);
         }
 
         if (trust.exists()) {
