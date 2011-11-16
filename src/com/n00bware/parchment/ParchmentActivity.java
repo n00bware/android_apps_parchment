@@ -265,9 +265,15 @@ public class ParchmentActivity extends Activity {
         oButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                 pFilename = open_filename.getText().toString();
-                Log.d(TAG, pFilename);
-                isReadOnly();
-                openDialog.dismiss();
+                File valid_path = new File(pFilename);
+                if (valid_path.exists()) {
+                    Log.d(TAG, pFilename);
+                    isReadOnly();
+                    openDialog.dismiss();
+                } else {
+                    Log.d(TAG, String.format("%s does not exist", pFilename));
+                    Toast.makeText(getApplicationContext(), String.format("%s is not a valid path", pFilename), Toast.LENGTH_SHORT).show();
+                }
             }
         });
         openDialog.show();
@@ -338,13 +344,20 @@ public class ParchmentActivity extends Activity {
         Log.d(TAG, String.format("pFile {%s} pFilename {%s}", pFile_path, pFilename));
         if (trust.exists() && trust.canWrite() && trust.canRead()) {
             Log.d(TAG, "Trust but verify ... all good here");
-        } else {Log.d(TAG, "Trust but verify ...failed combined checks");}
+            Toast.makeText(getApplicationContext(), String.format("%s has been saved", pFile_path), Toast.LENGTH_SHORT).show();
+        } else {
+            Log.d(TAG, "Trust but verify ...failed combined checks");
+            Toast.makeText(getApplicationContext(), String.format("%s has not been save", pFile_path), Toast.LENGTH_SHORT).show();
+        }
+
         if (trust.exists()) {
             Log.d(TAG, String.format("Trust but verify ... '%s' does in fact exist", pFile_path));
         } else {Log.d(TAG, "Trust but verify ... failed exists()");}
+
         if (trust.canRead()) {
             Log.d(TAG, "Trust but verify ... we can read " + pFile_path);
         } else {Log.d(TAG, "Trust but verify ...failed canRead()");}
+
         if (trust.canWrite()) {
             Log.d(TAG, "Trust but verify ... we can write " + pFile_path);
         } else {Log.d(TAG, "Trust but verify ... failed canWrite()");}
