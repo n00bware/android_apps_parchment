@@ -328,12 +328,14 @@ public class ParchmentActivity extends Activity {
             .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whatButton) {
                     saveDialog.dismiss();
+                    mIsNewFile = false;
                 }
             })
             .show();
         } else {
             Log.d(TAG, "if not a file already");
             saveDialog.dismiss();
+            mIsNewFile = false;
             writeFile();
         }
     }

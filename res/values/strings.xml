@@ -2,13 +2,15 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <string name="app_name">Parchment</string>
-    <string name="default_title">Parchment by n00bware</string>
-    <string name="version_name">Initial Release</string>
-    <string name="filename_text">Filename: </string>
-    <string name="save_button_text">Create file</string>
+    <string name="cancel">Cancel</string>
     <string name="clear">Clear screen</string>
+    <string name="default_title">Parchment by n00bware</string>
+    <string name="filename_text">Filename: </string>
+    <string name="new_file_title">Create new file?</string>
+    <string name="ok">Ok</string>
     <string name="open_button_text">Open</string>
     <string name="ro_fail_notice">Couldn\'t write to that destination</string>
-    <string name="new_file_title">Create new file?</string>
+    <string name="save_button_text">Create file</string>
+    <string name="version_name">Initial Release</string>
 
 </resources>
