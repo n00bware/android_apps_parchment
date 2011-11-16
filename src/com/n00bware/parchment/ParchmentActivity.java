@@ -266,7 +266,7 @@ public class ParchmentActivity extends Activity {
             public void onClick(View v) {
                 pFilename = open_filename.getText().toString();
                 File valid_path = new File(pFilename);
-                if (valid_path.exists()) {
+                if (valid_path.isFile()) {
                     Log.d(TAG, pFilename);
                     isReadOnly();
                     openDialog.dismiss();
@@ -286,11 +286,16 @@ public class ParchmentActivity extends Activity {
         EditText filename = (EditText) saveDialog.findViewById(R.id.sNewFile);
         filename.setSingleLine();
         filename.setText(pDir);
+        final String entered_path = filename.getText().toString();
 
         final Button sButton = (Button) saveDialog.findViewById(R.id.sButton);
         sButton.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-                saveAs();
+                if (entered_path.equals(BLANK)) {
+                    Toast.makeText(getApplicationContext(), "please enter full path", Toast.LENGTH_SHORT).show();
+                } else {
+                    saveAs();
+                }
             }
         });
 
