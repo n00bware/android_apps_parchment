@@ -68,18 +68,6 @@ public class ParchmentActivity extends Activity {
         setTitle(R.string.default_title);
         setContentView(R.layout.main);
 
-        final EditText old_text = (EditText)findViewById(R.id.pDoc);
-        final String pdoc_txt = old_text.getText().toString();
-
-        try {
-            String titleHolder = pFile.getAbsolutePath();
-            if (titleHolder != null) {
-                setTitle(titleHolder);
-            }
-        } catch (NullPointerException npe) {
-            npe.printStackTrace();
-        }
-
         File parchment_path = new File(DEFAULT_OPEN_PATH);
         if (!parchment_path.isDirectory()) {
             parchment_path.getParentFile().mkdir();
@@ -191,6 +179,13 @@ public class ParchmentActivity extends Activity {
             EditText eText = (EditText)findViewById(R.id.pDoc);
             eText.setText(textContainer);
             setTitle(pFilename);
+            EditText save_to_prefs = (EditText)findViewById(R.id.pDoc);
+            String text = save_to_prefs.getText().toString();
+            if (text != null) {
+                SharedPreferences.Editor prefEditor = pSharedPrefs.edit();
+                prefEditor.putString(SAVE_MARKER, text);
+                prefEditor.commit();
+            }
             Log.d(TAG, eText.getText().toString());
             reader.close();
         } catch(IOException e) {
@@ -306,8 +301,6 @@ public class ParchmentActivity extends Activity {
 
     private void saveAs() {
         EditText fname = (EditText) saveDialog.findViewById(R.id.sNewFile);
-        final EditText old_text = (EditText)findViewById(R.id.pDoc);
-        final String pdoc_txt = old_text.getText().toString();
         String filename = fname.getText().toString();
         File newFile = new File(Environment.getExternalStorageDirectory() + "/" + filename);
         String debug_filename = newFile.getAbsolutePath();
@@ -345,7 +338,7 @@ public class ParchmentActivity extends Activity {
     }
 
     private void trustButVerify() {
-        EditText old_text = (EditText)findViewById(R.id.pDoc);
+        EditText reset_text = (EditText)findViewById(R.id.pDoc);
         String pFile_path = pFile.getAbsolutePath();
         File trust = new File(pFile_path);
         Log.d(TAG, String.format("pFile {%s} pFilename {%s}", pFile_path, pFilename));
@@ -354,7 +347,7 @@ public class ParchmentActivity extends Activity {
             Toast.makeText(getApplicationContext(), String.format("%s has been saved", pFile_path), Toast.LENGTH_SHORT).show();
             setTitle(pFile_path);
             if (mIsNewFile) {
-                old_text.setText(BLANK);
+                reset_text.setText(BLANK);
             }
             mIsNewFile = false;
         } else {
