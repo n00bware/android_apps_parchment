@@ -172,6 +172,7 @@ public class ParchmentActivity extends Activity {
         try {
             Log.d(TAG, "loadText");
             byte[] buffer = new byte[(int)pFile.length()];
+            Log.d(TAG, pFile.toString());
             FileInputStream reader = new FileInputStream(pFile);
             reader.read(buffer);
 
@@ -188,9 +189,13 @@ public class ParchmentActivity extends Activity {
             }
             Log.d(TAG, eText.getText().toString());
             reader.close();
-        } catch(IOException e) {
+        } catch(IOException ioe) {
             Log.d(TAG, "Parsing error while loading " + pFilename);
+            ioe.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    Log.d(TAG, "loadText finished");
     }
 
     private void writeFile() {
@@ -213,8 +218,9 @@ public class ParchmentActivity extends Activity {
             SharedPreferences.Editor sEdit = pSharedPrefs.edit();
             sEdit.putString(LAST_INDEX, dir);
             sEdit.commit();
-        } catch(IOException e) {
+        } catch(IOException IOE) {
             Log.d(TAG, "Failed to write " + pFilename);
+            IOE.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
