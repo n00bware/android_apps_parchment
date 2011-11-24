@@ -210,23 +210,24 @@ public class ParchmentActivity extends Activity {
                 fWrite.write(text);
                 fWrite.flush();
                 fWrite.close();
+                String dir = LAST_INDEX;
+                Log.d(TAG, String.format("LAST_INDEX { %s } dir { %s }", LAST_INDEX, dir));
+                SharedPreferences.Editor sEdit = pSharedPrefs.edit();
+                sEdit.putString(LAST_INDEX, dir);
+                sEdit.commit();
             } catch (IOException IOe) {
                 Log.d(TAG, "IOException while FileWriter was writing file");
                 IOe.printStackTrace();
             }
 
-            String dir = LAST_INDEX;
-            Log.d(TAG, String.format("LAST_INDEX { %s } dir { %s }", LAST_INDEX, dir));
-            SharedPreferences.Editor sEdit = pSharedPrefs.edit();
-            sEdit.putString(LAST_INDEX, dir);
-            sEdit.commit();
+
         } catch(IOException IOE) {
             Log.d(TAG, "Failed to write " + pFilename);
             IOE.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        trustButVerify();
+    trustButVerify();
     }
 
     private void newFile() {
