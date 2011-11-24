@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -41,6 +42,7 @@ public class ParchmentActivity extends Activity {
     private final String DIRECTORY = "directory";
     private final String DEFAULT_OPEN_PATH = "/sdcard/parchment/parchment_test";
     private final String BLANK = "";
+    private final String OPEN_FILENAME = "FILE_TO_BE_OPENED:";
     private final String SAVE_MARKER = "saved_text";
     private final String LAST_INDEX = "last_index";
     private final String SAVE_ALERT_TITLE = "Save as %s";
@@ -251,35 +253,13 @@ public class ParchmentActivity extends Activity {
     }
 
     private void open() {
-        openDialog = new Dialog(this);
-        openDialog.setContentView(R.layout.open);
-        openDialog.setTitle("Open file... { full path }");
-        final EditText open_filename = (EditText) openDialog.findViewById(R.id.oNewFile);
-        open_filename.setSingleLine();
-        open_filename.setText(pDir);
-
-        if (pFilename != null) {
-            open_filename.setText(pFilename);
-        } else {
-            open_filename.setText(DEFAULT_OPEN_PATH);
-        }
-
-        final Button oButton = (Button) openDialog.findViewById(R.id.oButton);
-        oButton.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-                pFilename = open_filename.getText().toString();
-                File valid_path = new File(pFilename);
-                if (valid_path.isFile()) {
-                    Log.d(TAG, pFilename);
-                    isReadOnly();
-                    openDialog.dismiss();
-                } else {
-                    Log.d(TAG, String.format("%s does not exist", pFilename));
-                    Toast.makeText(getApplicationContext(), String.format("%s is not a valid path", pFilename), Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-        openDialog.show();
+pSharedPrefs.getString(SAVE_MARKER, BLANK);
+        SharedPreferences.Editor SharedFilename = pSharedPrefs.edit();
+        SharedFilename.putString(OPEN_FILENAME, BLANK);
+        SharedFilename.commit();
+        Intent open_file = new Intent(this, OpenDialog.class);
+        startActivity(open_file);
+        String returned_filename = pSharedPrefs.getString(OPEN_FILENAME, BLANK);
     }
 
     private void savePrompt() {
