@@ -42,7 +42,7 @@ public class ParchmentActivity extends Activity {
     private final String DIRECTORY = "directory";
     private final String DEFAULT_OPEN_PATH = "/sdcard/parchment/parchment_test";
     private final String BLANK = "";
-    private final String OPEN_FILENAME = "FILE_TO_BE_OPENED:";
+    private final String OPEN_FILENAME = "open_filepath";
     private final String SAVE_MARKER = "saved_text";
     private final String LAST_INDEX = "last_index";
     private final String SAVE_ALERT_TITLE = "Save as %s";
@@ -62,6 +62,7 @@ public class ParchmentActivity extends Activity {
     private Dialog openDialog;
     private File pFile;
     private File root = Environment.getExternalStorageDirectory();
+    private Intent intent;
     private SharedPreferences pSharedPrefs;
 
     @Override
@@ -92,7 +93,7 @@ public class ParchmentActivity extends Activity {
 
         if (!root.canWrite()) {Log.d(TAG, "sdcard is not writable");} else {Log.d(TAG, "sdcard is writable");}
 
-        pSharedPrefs = getPreferences(MODE_PRIVATE);
+        pSharedPrefs = getPreferences(MODE_WORLD_WRITEABLE);
         //TODO: best to start @ /# or sdcard/parchment/#
         pDir = pSharedPrefs.getString(DIRECTORY, "/");
         /*
@@ -254,13 +255,27 @@ public class ParchmentActivity extends Activity {
     }
 
     private void open() {
-pSharedPrefs.getString(SAVE_MARKER, BLANK);
+        String save_marker = new String (pSharedPrefs.getString(SAVE_MARKER, BLANK));
+        Log.d(TAG, String.format("save_marker: %s", save_marker));
         SharedPreferences.Editor SharedFilename = pSharedPrefs.edit();
         SharedFilename.putString(OPEN_FILENAME, BLANK);
         SharedFilename.commit();
-        Intent open_file = new Intent(this, OpenDialog.class);
-        startActivity(open_file);
-        String returned_filename = pSharedPrefs.getString(OPEN_FILENAME, BLANK);
+        Intent open_file = new Intent(this, OpenFileDialog.class);
+        open_file.putExtra(OPEN_FILENAME, BLANK);
+        startActivityForResult(open_file, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        String data_string = data.getStringExtra(OPEN_FILENAME);
+        Log.d(TAG, String.format("extra data found: %s", data_string));
+
+        if (!data_string.equals(BLANK)) {
+            pFilename = data_string;
+            Log.d(TAG, String.format("Setting pFilename=%s", data_string));
+            setTitle(data_string);
+            isReadOnly();
+        }
     }
 
     private void savePrompt() {
