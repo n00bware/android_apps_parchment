@@ -43,6 +43,7 @@ public class ParchmentActivity extends Activity {
     private final String DEFAULT_OPEN_PATH = "/sdcard/parchment/parchment_test";
     private final String BLANK = "";
     private final String OPEN_FILENAME = "open_filepath";
+    private final String SAVE_FILENAME = "save_filepath";
     private final String SAVE_MARKER = "saved_text";
     private final String LAST_INDEX = "last_index";
     private final String SAVE_ALERT_TITLE = "Save as %s";
@@ -58,6 +59,7 @@ public class ParchmentActivity extends Activity {
 
     private boolean mIsNewFile = false;
 
+    private Button saveButton;
     private Dialog saveDialog;
     private Dialog openDialog;
     private File pFile;
@@ -262,41 +264,43 @@ public class ParchmentActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        String data_string = data.getStringExtra(OPEN_FILENAME);
-        Log.d(TAG, String.format("extra data found: %s", data_string));
 
-        if (!data_string.equals(BLANK)) {
-            pFilename = data_string;
-            Log.d(TAG, String.format("Setting pFilename=%s", data_string));
-            setTitle(data_string);
-            isReadOnly();
+        if (requestCode == 1) {
+            String open_data_string = data.getStringExtra(OPEN_FILENAME);
+            Log.d(TAG, String.format("extra data found: %s", open_data_string));
+
+            if (!open_data_string.equals(BLANK)) {
+                pFilename = open_data_string;
+                Log.d(TAG, String.format("Setting pFilename=%s", open_data_string));
+                setTitle(open_data_string);
+                isReadOnly();
+            }
         }
+
+        if (requestCode == 4) {
+            String save_data_string = data.getStringExtra(SAVE_FILENAME);
+            Log.d(TAG, String.format("extra data found: %s", save_data_string));
+
+            if (!save_data_string.equals(BLANK)) {
+                pFilename = save_data_string;
+                Log.d(TAG, String.format("Setting pFilename=%s", save_data_string));
+                setTitle(save_data_string);
+                pFile = new File(save_data_string);
+                saveAs();
+            }
+        }
+        Log.wtf(TAG, "This shouldn't ever happen ...shit is fucked up");
+
     }
 
     private void savePrompt() {
-        saveDialog = new Dialog(this);
-        saveDialog.setContentView(R.layout.save);
-        saveDialog.setTitle("Save as... { full path }");
-        EditText filename = (EditText) saveDialog.findViewById(R.id.sNewFile);
-        filename.setSingleLine();
-        filename.setText(pDir);
-        final String entered_path = filename.getText().toString();
-
-        final Button sButton = (Button) saveDialog.findViewById(R.id.sButton);
-        sButton.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-                if (entered_path.equals(BLANK)) {
-                    Toast.makeText(getApplicationContext(), "please enter full path", Toast.LENGTH_SHORT).show();
-                } else {
-                    saveAs();
-                }
-            }
-        });
-
-        saveDialog.show();
+        Intent save_file = new Intent(this, SaveFileDialog.class);
+        save_file.putExtra(SAVE_FILENAME, BLANK);
+        startActivityForResult(save_file, 4);
     }
 
     private void saveAs() {
+//TODO yo drunkerd fix this!!!
         EditText fname = (EditText) saveDialog.findViewById(R.id.sNewFile);
         String filename = fname.getText().toString();
         File newFile = new File(Environment.getExternalStorageDirectory() + "/" + filename);

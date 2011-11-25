@@ -14,17 +14,24 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class OpenFileDialog extends ListActivity {
+public class SaveFileDialog extends ListActivity {
 
+    private Button saveButton;
+    private EditText saveFilename;
     private Intent intent;
     private List<String> item = null;
     private List<String> path = null;
-    private final String OPEN_FILENAME = "open_filepath";
+    private String BLANK = "";
     private String root="/";
+    private final String SAVE_FILENAME = "save_filepath";
     private final String TAG = "Parchment";
     private SharedPreferences mSharedPrefs;
     private TextView myPath;
@@ -33,14 +40,34 @@ public class OpenFileDialog extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.open_file);
-        myPath = (TextView)findViewById(R.id.path);
+        setContentView(R.layout.save_file);
+
+        myPath = (TextView)findViewById(R.id.spath);
+        saveFilename = (EditText)findViewById(R.id.save_filename);
+
+        saveButton = (Button)findViewById(R.id.save_button);
+        saveButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String filename_entered = saveFilename.getText().toString();
+                Log.d(TAG, String.format("path detected: %s", filename_entered));
+                if (!filename_entered.equals(BLANK)) {
+                    intent = getIntent();
+                    intent.putExtra(SAVE_FILENAME, filename_entered);
+                    setResult(RESULT_OK, intent);
+                    finish();
+                } else {
+                    Toast.makeText(getApplicationContext(), "No filename detected ...Please enter a filename to save", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
         getDir(root);
     }
     
     private void getDir(String dirPath) {
 
         myPath.setText("Location: " + dirPath);
+        saveFilename.setText(dirPath);
 
         item = new ArrayList<String>();
         path = new ArrayList<String>();
@@ -73,12 +100,12 @@ public class OpenFileDialog extends ListActivity {
 	
         final File file = new File(path.get(position));
         if (file.isDirectory()) {
-            if(file.canRead()) {
+            if(file.canWrite()) {
                 getDir(path.get(position));
             } else {
                 new AlertDialog.Builder(this)
                 .setIcon(R.drawable.open)
-                .setTitle("[" + file.getName() + "] folder can't be read!")
+                .setTitle("We can't write to [" + file.getName() + "] !")
                 .setPositiveButton("OK", 
                 new DialogInterface.OnClickListener() {
                     @Override
@@ -91,14 +118,14 @@ public class OpenFileDialog extends ListActivity {
             new AlertDialog.Builder(this)
             .setIcon(R.drawable.files)
             .setTitle("[" + file.getName() + "]")
-            .setPositiveButton("Open?", 
+            .setPositiveButton("Save as?", 
             new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     String filename = new String(file.getAbsolutePath());
                     Log.d(TAG, String.format("File selected: %s", filename));
                     intent = getIntent();
-                    intent.putExtra(OPEN_FILENAME, filename);
+                    intent.putExtra(SAVE_FILENAME, filename);
                     setResult(RESULT_OK, intent);
                     finish();
                 }

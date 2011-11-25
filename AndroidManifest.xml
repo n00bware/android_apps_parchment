@@ -28,5 +28,8 @@
         <activity android:name=".OpenFileDialog"
             android:label="@string/app_name" >
         </activity>
+        <activity android:name=".SaveFileDialog"
+            android:label="@string/app_name" >
+        </activity>
     </application>
 </manifest>
