@@ -67,7 +67,9 @@ public class SaveFileDialog extends ListActivity {
     private void getDir(String dirPath) {
 
         myPath.setText("Location: " + dirPath);
-        saveFilename.setText(dirPath);
+        if (!dirPath.equals("/")) {
+            saveFilename.setText(dirPath +"/");
+        }
 
         item = new ArrayList<String>();
         path = new ArrayList<String>();
@@ -82,8 +84,12 @@ public class SaveFileDialog extends ListActivity {
 
         for (int i=0; i < files.length; i++) {
             File file = files[i];
-            Collections.sort(item, String.CASE_INSENSITIVE_ORDER);
             path.add(file.getPath());
+
+            //put list in alphabetic order
+            Collections.sort(item, String.CASE_INSENSITIVE_ORDER);
+            Collections.sort(path, String.CASE_INSENSITIVE_ORDER);
+
             if (file.isDirectory()) {
                 item.add(file.getName() + "/");
             } else {

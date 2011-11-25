@@ -11,6 +11,8 @@
     <string name="ok">Ok</string>
     <string name="open_button_text">Open</string>
     <string name="ro_fail_notice">Couldn\'t write to that destination</string>
+    <string name="save">Save</string>
+    <string name="save_blank">Can\'t save a blank document</string>
     <string name="save_button_text">Create file</string>
     <string name="version_name">Initial Release</string>
 

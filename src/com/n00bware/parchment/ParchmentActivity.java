@@ -60,8 +60,6 @@ public class ParchmentActivity extends Activity {
     private boolean mIsNewFile = false;
 
     private Button saveButton;
-    private Dialog saveDialog;
-    private Dialog openDialog;
     private File pFile;
     private File root = Environment.getExternalStorageDirectory();
     private Intent intent;
@@ -73,16 +71,6 @@ public class ParchmentActivity extends Activity {
         setTitle(R.string.default_title);
         setContentView(R.layout.main);
 
-        File parchment_path = new File(DEFAULT_OPEN_PATH);
-        if (!parchment_path.isDirectory()) {
-            parchment_path.getParentFile().mkdir();
-        }
-        if (parchment_path == null) {
-            Log.d(TAG, "shit nulled return from parchment_path");
-        } else {
-            Log.d(TAG, "parchment_path returned " + parchment_path.getParentFile().getName());
-        }
-
         Bundle args = getIntent().getExtras();
         if (args != null) {
             pFilename = args.getString(FILENAME);
@@ -93,10 +81,23 @@ public class ParchmentActivity extends Activity {
             Log.d(TAG, "args: null");
         }
 
-        if (!root.canWrite()) {Log.d(TAG, "sdcard is not writable");} else {Log.d(TAG, "sdcard is writable");}
+
+
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            Log.d(TAG, "sdcard mounted");
+            if (!root.canWrite()) {
+                Log.d(TAG, "however sdcard is not writable");
+            } else {
+                Log.d(TAG, "sdcard is also writable");
+            }
+        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            Log.d(TAG, "sdcard readonly");
+        } else {
+            Log.d(TAG, "epic failure");
+        }
 
         pSharedPrefs = getPreferences(MODE_WORLD_WRITEABLE);
-        //TODO: best to start @ /# or sdcard/parchment/#
         pDir = pSharedPrefs.getString(DIRECTORY, "/");
         /*
          * TODO: read only is important but we should look into
@@ -144,38 +145,16 @@ public class ParchmentActivity extends Activity {
     }
 
     private void isReadOnly() {
-        Log.d(TAG, "isReadOnly");
         pFile = new File(pFilename);
 
-        if (pFile.canWrite()) {Log.d(TAG, "canWrite() true");}
-        if (pFile.exists()) {Log.d(TAG, "exists() true");}
-        if (pFile.canRead()) {Log.d(TAG, "canRead() true");}
         String file_path = pFile.getAbsolutePath();
         Log.d(TAG, String.format("file path { %s }", file_path));
-        Log.d(TAG, pFile.toString());
-
-        boolean mExternalStorageAvailable = false;
-        boolean mExternalStorageWriteable = false;
-        String state = Environment.getExternalStorageState();
-
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            mExternalStorageAvailable = mExternalStorageWriteable = true;
-            Log.d(TAG, "sdcard mounted");
-        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            mExternalStorageAvailable = true;
-            mExternalStorageWriteable = false;
-            Log.d(TAG, "sdcard readonly");
-        } else {
-            mExternalStorageAvailable = mExternalStorageWriteable = false;
-            Log.d(TAG, "epic failure");
-        }
 
         loadText();
     }
 
     private void loadText() {
         try {
-            Log.d(TAG, "loadText");
             byte[] buffer = new byte[(int)pFile.length()];
             Log.d(TAG, pFile.toString());
             FileInputStream reader = new FileInputStream(pFile);
@@ -200,7 +179,6 @@ public class ParchmentActivity extends Activity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    Log.d(TAG, "loadText finished");
     }
 
     private void writeFile() {
@@ -214,7 +192,6 @@ public class ParchmentActivity extends Activity {
                 fWrite.flush();
                 fWrite.close();
                 String dir = LAST_INDEX;
-                Log.d(TAG, String.format("LAST_INDEX { %s } dir { %s }", LAST_INDEX, dir));
                 SharedPreferences.Editor sEdit = pSharedPrefs.edit();
                 sEdit.putString(LAST_INDEX, dir);
                 sEdit.commit();
@@ -222,7 +199,6 @@ public class ParchmentActivity extends Activity {
                 Log.d(TAG, "IOException while FileWriter was writing file");
                 IOe.printStackTrace();
             }
-
 
         } catch(IOException IOE) {
             Log.d(TAG, "Failed to write " + pFilename);
@@ -251,8 +227,7 @@ public class ParchmentActivity extends Activity {
                     old_text.setText(BLANK);
                     setTitle(R.string.default_title);
                 }
-            })
-            .show();
+            }).show();
         }
     }
 
@@ -266,73 +241,75 @@ public class ParchmentActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (requestCode == 1) {
-            String open_data_string = data.getStringExtra(OPEN_FILENAME);
-            Log.d(TAG, String.format("extra data found: %s", open_data_string));
+            try {
+                String open_data_string = data.getStringExtra(OPEN_FILENAME);
+                Log.d(TAG, String.format("extra open data found: %s", open_data_string));
 
-            if (!open_data_string.equals(BLANK)) {
-                pFilename = open_data_string;
-                Log.d(TAG, String.format("Setting pFilename=%s", open_data_string));
-                setTitle(open_data_string);
-                isReadOnly();
+                if (!open_data_string.equals(BLANK)) {
+                    pFilename = open_data_string;
+                    Log.d(TAG, String.format("Setting pFilename=%s", open_data_string));
+                    setTitle(open_data_string);
+                    isReadOnly();
+                }
+            } catch (NullPointerException npe) {
+                npe.printStackTrace();
             }
         }
 
         if (requestCode == 4) {
-            String save_data_string = data.getStringExtra(SAVE_FILENAME);
-            Log.d(TAG, String.format("extra data found: %s", save_data_string));
+            try {
+                String save_data_string = data.getStringExtra(SAVE_FILENAME);
+                Log.d(TAG, String.format("extra save data found: %s", save_data_string));
 
-            if (!save_data_string.equals(BLANK)) {
-                pFilename = save_data_string;
-                Log.d(TAG, String.format("Setting pFilename=%s", save_data_string));
-                setTitle(save_data_string);
-                pFile = new File(save_data_string);
-                saveAs();
+                if (!save_data_string.equals(BLANK)) {
+                    pFilename = save_data_string;
+                    Log.d(TAG, String.format("Setting pFilename=%s", save_data_string));
+                    setTitle(save_data_string);
+                    pFile = new File(save_data_string);
+                    saveAs();
+                }
+            } catch (NullPointerException npe) {
+                Toast.makeText(getApplicationContext(), "no file was returned", Toast.LENGTH_SHORT).show();
+                npe.printStackTrace();
             }
-        }
         Log.wtf(TAG, "This shouldn't ever happen ...shit is fucked up");
+        }
 
     }
 
     private void savePrompt() {
-        Intent save_file = new Intent(this, SaveFileDialog.class);
-        save_file.putExtra(SAVE_FILENAME, BLANK);
-        startActivityForResult(save_file, 4);
+        EditText et = (EditText)findViewById(R.id.pDoc);
+        String txt = et.getText().toString();
+
+        if (!txt.equals(BLANK)) {
+            Intent save_file = new Intent(this, SaveFileDialog.class);
+            save_file.putExtra(SAVE_FILENAME, BLANK);
+            startActivityForResult(save_file, 4);
+        } else {
+            Toast.makeText(getApplicationContext(), R.string.save_blank, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void saveAs() {
-//TODO yo drunkerd fix this!!!
-        EditText fname = (EditText) saveDialog.findViewById(R.id.sNewFile);
-        String filename = fname.getText().toString();
-        File newFile = new File(Environment.getExternalStorageDirectory() + "/" + filename);
-        String debug_filename = newFile.getAbsolutePath();
-        if (!newFile.exists()) {Log.d(TAG, "saveAs newFile !exists");}
-        if (!newFile.canWrite()) {Log.d(TAG, "saveAs newFile canWrite=false");}
-        if (!newFile.canRead()) {Log.d(TAG, "saveAs newFile canRead=false");}
-        Log.d(TAG, "the file we are attempting to save is " + debug_filename);
-
-        pFile = newFile;
         Log.d(TAG, pFile.getAbsolutePath());
 
-        if (!newFile.isFile()) {
+        if (!pFile.isFile()) {
             new AlertDialog.Builder(this)
             .setTitle(String.format(SAVE_ALERT_TITLE, pFile.getAbsolutePath()))
             .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whatButton) {
-                    saveDialog.dismiss();
                     mIsNewFile = false;
                     writeFile();
                 }
             })
             .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whatButton) {
-                    saveDialog.dismiss();
                     mIsNewFile = false;
                 }
             })
             .show();
         } else {
             Log.d(TAG, "if not a file already");
-            saveDialog.dismiss();
             mIsNewFile = false;
             writeFile();
         }
@@ -343,10 +320,12 @@ public class ParchmentActivity extends Activity {
         String pFile_path = pFile.getAbsolutePath();
         File trust = new File(pFile_path);
         Log.d(TAG, String.format("pFile {%s} pFilename {%s}", pFile_path, pFilename));
+
         if (trust.exists() && trust.canWrite() && trust.canRead()) {
             Log.d(TAG, "Trust but verify ... all good here");
             Toast.makeText(getApplicationContext(), String.format("%s has been saved", pFile_path), Toast.LENGTH_SHORT).show();
             setTitle(pFile_path);
+
             if (mIsNewFile) {
                 reset_text.setText(BLANK);
             }
@@ -356,19 +335,25 @@ public class ParchmentActivity extends Activity {
             Log.d(TAG, "Trust but verify ...failed combined checks");
             Toast.makeText(getApplicationContext(), String.format("%s has not been save", pFile_path), Toast.LENGTH_SHORT).show();
             setTitle(R.string.default_title);
+
+            if (trust.exists()) {
+                Log.d(TAG, String.format("Trust but verify ... '%s' does in fact exist", pFile_path));
+            } else {
+                Log.d(TAG, "Trust but verify ... failed exists()");
+            }
+
+            if (trust.canRead()) {
+                Log.d(TAG, "Trust but verify ... we can read " + pFile_path);
+            } else {
+                Log.d(TAG, "Trust but verify ...failed canRead()");
+            }
+
+            if (trust.canWrite()) {
+                Log.d(TAG, "Trust but verify ... we can write " + pFile_path);
+            } else {
+                Log.d(TAG, "Trust but verify ... failed canWrite()");
+            }
         }
-
-        if (trust.exists()) {
-            Log.d(TAG, String.format("Trust but verify ... '%s' does in fact exist", pFile_path));
-        } else {Log.d(TAG, "Trust but verify ... failed exists()");}
-
-        if (trust.canRead()) {
-            Log.d(TAG, "Trust but verify ... we can read " + pFile_path);
-        } else {Log.d(TAG, "Trust but verify ...failed canRead()");}
-
-        if (trust.canWrite()) {
-            Log.d(TAG, "Trust but verify ... we can write " + pFile_path);
-        } else {Log.d(TAG, "Trust but verify ... failed canWrite()");}
     }
 
     @Override
@@ -395,6 +380,7 @@ public class ParchmentActivity extends Activity {
                 break;
             case OPEN:
                 open();
+                break;
         }
     return false;
     }
