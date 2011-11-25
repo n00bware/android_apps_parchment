@@ -255,11 +255,6 @@ public class ParchmentActivity extends Activity {
     }
 
     private void open() {
-        String save_marker = new String (pSharedPrefs.getString(SAVE_MARKER, BLANK));
-        Log.d(TAG, String.format("save_marker: %s", save_marker));
-        SharedPreferences.Editor SharedFilename = pSharedPrefs.edit();
-        SharedFilename.putString(OPEN_FILENAME, BLANK);
-        SharedFilename.commit();
         Intent open_file = new Intent(this, OpenFileDialog.class);
         open_file.putExtra(OPEN_FILENAME, BLANK);
         startActivityForResult(open_file, 1);
