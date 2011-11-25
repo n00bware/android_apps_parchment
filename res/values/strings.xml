@@ -14,6 +14,6 @@
     <string name="save">Save</string>
     <string name="save_blank">Can\'t save a blank document</string>
     <string name="save_button_text">Create file</string>
-    <string name="version_name">Initial Release</string>
+    <string name="version_name">Riley Release</string>
 
 </resources>
