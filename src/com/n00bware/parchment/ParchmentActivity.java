@@ -71,6 +71,10 @@ public class ParchmentActivity extends Activity {
         setTitle(R.string.default_title);
         setContentView(R.layout.main);
 
+        //we want to be sure Global.SAVEABLE =TRUE
+        //then set false when just opening
+        Global.SAVEABLE = true;
+
         Bundle args = getIntent().getExtras();
         if (args != null) {
             pFilename = args.getString(FILENAME);
@@ -232,7 +236,8 @@ public class ParchmentActivity extends Activity {
     }
 
     private void open() {
-        Intent open_file = new Intent(this, OpenFileDialog.class);
+        Global.SAVEABLE = false;
+        Intent open_file = new Intent(this, FilePicker.class);
         open_file.putExtra(OPEN_FILENAME, BLANK);
         startActivityForResult(open_file, 1);
     }
@@ -282,7 +287,8 @@ public class ParchmentActivity extends Activity {
         String txt = et.getText().toString();
 
         if (!txt.equals(BLANK)) {
-            Intent save_file = new Intent(this, SaveFileDialog.class);
+            Global.SAVEABLE = true;
+            Intent save_file = new Intent(this, FilePicker.class);
             save_file.putExtra(SAVE_FILENAME, BLANK);
             startActivityForResult(save_file, 4);
         } else {

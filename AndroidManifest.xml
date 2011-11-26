@@ -25,11 +25,10 @@
                 <data android:mimeType="application/x-sh" />
             </intent-filter>
         </activity>
-        <activity android:name=".OpenFileDialog"
+
+        <activity android:name=".FilePicker"
             android:label="@string/app_name" >
         </activity>
-        <activity android:name=".SaveFileDialog"
-            android:label="@string/app_name" >
-        </activity>
+
     </application>
 </manifest>

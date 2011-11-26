@@ -18,11 +18,12 @@ import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class SaveFileDialog extends ListActivity {
+public class FilePicker extends ListActivity {
 
     private Button saveButton;
     private EditText saveFilename;
@@ -31,6 +32,7 @@ public class SaveFileDialog extends ListActivity {
     private List<String> path = null;
     private String BLANK = "";
     private String root="/";
+    private final String OPEN_FILENAME = "open_filepath";
     private final String SAVE_FILENAME = "save_filepath";
     private final String TAG = "Parchment";
     private SharedPreferences mSharedPrefs;
@@ -40,10 +42,15 @@ public class SaveFileDialog extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.save_file);
+        setContentView(R.layout.file_picker);
 
-        myPath = (TextView)findViewById(R.id.spath);
+        myPath = (TextView)findViewById(R.id.path);
         saveFilename = (EditText)findViewById(R.id.save_filename);
+
+        LinearLayout save_layout = (LinearLayout)findViewById(R.id.save_layout);
+        if (!Global.SAVEABLE) {
+            save_layout.setVisibility(View.GONE);
+        }
 
         saveButton = (Button)findViewById(R.id.save_button);
         saveButton.setOnClickListener(new OnClickListener() {
@@ -55,6 +62,7 @@ public class SaveFileDialog extends ListActivity {
                     intent = getIntent();
                     intent.putExtra(SAVE_FILENAME, filename_entered);
                     setResult(RESULT_OK, intent);
+                    Global.SAVEABLE = true;
                     finish();
                 } else {
                     Toast.makeText(getApplicationContext(), "No filename detected ...Please enter a filename to save", Toast.LENGTH_SHORT).show();
@@ -133,6 +141,7 @@ public class SaveFileDialog extends ListActivity {
                     intent = getIntent();
                     intent.putExtra(SAVE_FILENAME, filename);
                     setResult(RESULT_OK, intent);
+                    Global.SAVEABLE = true;
                     finish();
                 }
             })
