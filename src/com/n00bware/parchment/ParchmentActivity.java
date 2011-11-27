@@ -79,9 +79,11 @@ public class ParchmentActivity extends Activity {
         if (args != null) {
             pFilename = args.getString(FILENAME);
             setTitle(pFilename);
+            Global.PREV_PATH = pFilename;
             Log.d(TAG, "args: " + pFilename);
         } else {
             setTitle(R.string.default_title);
+            Global.PREV_PATH = "/";
             Log.d(TAG, "args: null");
         }
 

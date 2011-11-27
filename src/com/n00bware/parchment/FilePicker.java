@@ -31,12 +31,30 @@ public class FilePicker extends ListActivity {
     private List<String> item = null;
     private List<String> path = null;
     private String BLANK = "";
+    private String DIR_MARKER = "/";
     private String root="/";
     private final String OPEN_FILENAME = "open_filepath";
+    private final String OPEN = "open";
+    private final String PARENT_DIR = "../";
+    private final String SAVE = "save";
     private final String SAVE_FILENAME = "save_filepath";
     private final String TAG = "Parchment";
     private SharedPreferences mSharedPrefs;
     private TextView myPath;
+
+    private final String prompt_title = "{%s}";
+    private final String file_selection_error_write = "We can't write to {%s}";
+    private final String file_selection_error_read = "We can\'t read {%s}";
+    private final String save_prompt = "Save as?";
+    private final String save_message = "Save as {%s}";
+    private final String open_message = "Open {%s}";
+    private final String open_prompt = "Open?";
+    private final String no_filename_save_error = "No filename detected ...Please enter a filename to save";
+    private final String location_tracker = "Location: %s";
+
+    private String mPrompt;
+    private String mFileError;
+    private String mMessage;
 
     /** Called when the activity is first created. */
     @Override
@@ -47,10 +65,12 @@ public class FilePicker extends ListActivity {
         myPath = (TextView)findViewById(R.id.path);
         saveFilename = (EditText)findViewById(R.id.save_filename);
 
+        //decide if we want to save or just open file
         LinearLayout save_layout = (LinearLayout)findViewById(R.id.save_layout);
         if (!Global.SAVEABLE) {
             save_layout.setVisibility(View.GONE);
         }
+        setStrings();
 
         saveButton = (Button)findViewById(R.id.save_button);
         saveButton.setOnClickListener(new OnClickListener() {
@@ -63,20 +83,23 @@ public class FilePicker extends ListActivity {
                     intent.putExtra(SAVE_FILENAME, filename_entered);
                     setResult(RESULT_OK, intent);
                     Global.SAVEABLE = true;
+                    Global.PREV_PATH = filename_entered;
                     finish();
                 } else {
-                    Toast.makeText(getApplicationContext(), "No filename detected ...Please enter a filename to save", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), no_filename_save_error, Toast.LENGTH_SHORT).show();
                 }
             }
         });
-        getDir(root);
+        Log.d(TAG, Global.PREV_PATH);
+        getDir(Global.PREV_PATH);
     }
     
     private void getDir(String dirPath) {
 
-        myPath.setText("Location: " + dirPath);
-        if (!dirPath.equals("/")) {
-            saveFilename.setText(dirPath +"/");
+        myPath.setText(String.format(location_tracker, dirPath));
+        if (!dirPath.equals(DIR_MARKER)) {
+            saveFilename.setText(dirPath +DIR_MARKER);
+            Global.PREV_PATH = dirPath;
         }
 
         item = new ArrayList<String>();
@@ -86,7 +109,7 @@ public class FilePicker extends ListActivity {
         if (!dirPath.equals(root)) {
             item.add(root);
             path.add(root);
-            item.add("../");
+            item.add(PARENT_DIR);
             path.add(f.getParent());
         }
 
@@ -99,7 +122,7 @@ public class FilePicker extends ListActivity {
             Collections.sort(path, String.CASE_INSENSITIVE_ORDER);
 
             if (file.isDirectory()) {
-                item.add(file.getName() + "/");
+                item.add(file.getName() + DIR_MARKER);
             } else {
                 item.add(file.getName());
             }
@@ -113,13 +136,15 @@ public class FilePicker extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
 	
         final File file = new File(path.get(position));
+        final String title = String.format(mFileError, file.getAbsolutePath());
+
         if (file.isDirectory()) {
             if(file.canWrite()) {
                 getDir(path.get(position));
             } else {
                 new AlertDialog.Builder(this)
                 .setIcon(R.drawable.open)
-                .setTitle("We can't write to [" + file.getName() + "] !")
+                .setTitle(title)
                 .setPositiveButton("OK", 
                 new DialogInterface.OnClickListener() {
                     @Override
@@ -131,17 +156,25 @@ public class FilePicker extends ListActivity {
         } else {
             new AlertDialog.Builder(this)
             .setIcon(R.drawable.files)
-            .setTitle("[" + file.getName() + "]")
-            .setPositiveButton("Save as?", 
+            .setTitle(mMessage)
+            .setPositiveButton(mPrompt,
             new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+                    intent = getIntent();
+
                     String filename = new String(file.getAbsolutePath());
                     Log.d(TAG, String.format("File selected: %s", filename));
-                    intent = getIntent();
-                    intent.putExtra(SAVE_FILENAME, filename);
+
+                    if (!Global.SAVEABLE) {
+                        intent.putExtra(OPEN_FILENAME, filename);
+                    } else {
+                        intent.putExtra(SAVE_FILENAME, filename);
+                    }
+
                     setResult(RESULT_OK, intent);
                     Global.SAVEABLE = true;
+                    Global.PREV_PATH = filename;
                     finish();
                 }
             })
@@ -151,6 +184,18 @@ public class FilePicker extends ListActivity {
                 public void onClick(DialogInterface dialog, int which) {
                 }
             }).show();
+        }
+    }
+
+    public void setStrings() {
+        if (!Global.SAVEABLE) {
+            mPrompt = open_prompt;
+            mFileError = file_selection_error_read;
+            mMessage = open_message;
+        } else {
+            mPrompt = save_prompt;
+            mFileError = file_selection_error_write;
+            mMessage = save_message;
         }
     }
 }

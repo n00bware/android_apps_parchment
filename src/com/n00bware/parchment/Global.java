@@ -7,6 +7,7 @@ public class Global {
         //private construct
     }
 
-    public static boolean SAVEABLE;  //show save textedit and button
+    public static boolean SAVEABLE;  //show save_layout? true=show false=hide
+    public static String PREV_PATH; //track path globally
 
 }

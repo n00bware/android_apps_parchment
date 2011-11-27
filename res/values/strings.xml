@@ -16,4 +16,12 @@
     <string name="save_button_text">Create file</string>
     <string name="version_name">Riley Release</string>
 
+    <string name="prompt_title">{%s}</string>
+    <string name="file_selection_error_write">We can\'t write to {%s}</string>
+    <string name="file_selection_error_read">We can\'t read {%s}</string>
+    <string name="save_prompt">Save as?</string>
+    <string name="open_prompt">Open?</string>
+    <string name="no_filename_save_error">No filename detected ...Please enter a filename to save</string>
+    <string name="location_tracker">Location: %s</string>
+
 </resources>
