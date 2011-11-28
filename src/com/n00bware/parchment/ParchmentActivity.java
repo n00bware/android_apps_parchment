@@ -42,6 +42,7 @@ public class ParchmentActivity extends Activity {
     private final String DIRECTORY = "directory";
     private final String DEFAULT_OPEN_PATH = "/sdcard/parchment/parchment_test";
     private final String BLANK = "";
+    private final String ROOT_DIR = "/";
     private final String OPEN_FILENAME = "open_filepath";
     private final String SAVE_FILENAME = "save_filepath";
     private final String SAVE_MARKER = "saved_text";
@@ -68,8 +69,6 @@ public class ParchmentActivity extends Activity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        setTitle(R.string.default_title);
-        setContentView(R.layout.main);
 
         //we want to be sure Global.SAVEABLE =TRUE
         //then set false when just opening
@@ -82,12 +81,13 @@ public class ParchmentActivity extends Activity {
             Global.PREV_PATH = pFilename;
             Log.d(TAG, "args: " + pFilename);
         } else {
-            setTitle(R.string.default_title);
-            Global.PREV_PATH = "/";
             Log.d(TAG, "args: null");
         }
 
-
+        if ((Global.PREV_PATH == null) || (Global.PREV_PATH.equals(ROOT_DIR))) {
+            setTitle(R.string.default_title);
+            Global.PREV_PATH = ROOT_DIR;
+        }
 
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
@@ -116,8 +116,12 @@ public class ParchmentActivity extends Activity {
     @Override
     public void onStart(){
         super.onStart();
-        setTitle(R.string.default_title);
         setContentView(R.layout.main);
+
+        if ((Global.PREV_PATH == null) || (Global.PREV_PATH.equals(ROOT_DIR))) {
+            setTitle(R.string.default_title);
+            Global.PREV_PATH = ROOT_DIR;
+        }
 
         pContents = pSharedPrefs.getString(SAVE_MARKER, BLANK);
         if (!pContents.equals(BLANK)) {
@@ -155,6 +159,10 @@ public class ParchmentActivity extends Activity {
 
         String file_path = pFile.getAbsolutePath();
         Log.d(TAG, String.format("file path { %s }", file_path));
+        if (!file_path.equals(ROOT_DIR)) {
+            setTitle(file_path);
+            Log.d(TAG, String.format("Title should be %s", file_path));
+        }
 
         loadText();
     }
@@ -169,21 +177,19 @@ public class ParchmentActivity extends Activity {
             textContainer = new String(buffer);
             EditText eText = (EditText)findViewById(R.id.pDoc);
             eText.setText(textContainer);
-            setTitle(pFilename);
-            EditText save_to_prefs = (EditText)findViewById(R.id.pDoc);
-            String text = save_to_prefs.getText().toString();
+            String text = eText.getText().toString();
             if (text != null) {
                 SharedPreferences.Editor prefEditor = pSharedPrefs.edit();
                 prefEditor.putString(SAVE_MARKER, text);
                 prefEditor.commit();
             }
-            Log.d(TAG, eText.getText().toString());
+            Log.d(TAG, "Text found: " + eText.getText().toString());
             reader.close();
         } catch(IOException ioe) {
             Log.d(TAG, "Parsing error while loading " + pFilename);
-            ioe.printStackTrace();
+            //swallowed exception
         } catch (Exception e) {
-            e.printStackTrace();
+            //swallowed exception
         }
     }
 
@@ -193,6 +199,8 @@ public class ParchmentActivity extends Activity {
             String text = eText.getText().toString();
             FileWriter fWrite = new FileWriter(pFile);
             Log.d(TAG, String.format("text we are attempting to write { %s }", text));
+            String titleSet = pFile.getAbsolutePath();
+            setTitle(titleSet);
             try {
                 fWrite.write(text);
                 fWrite.flush();
@@ -203,14 +211,14 @@ public class ParchmentActivity extends Activity {
                 sEdit.commit();
             } catch (IOException IOe) {
                 Log.d(TAG, "IOException while FileWriter was writing file");
-                IOe.printStackTrace();
+                //swallowed exception
             }
 
         } catch(IOException IOE) {
             Log.d(TAG, "Failed to write " + pFilename);
-            IOE.printStackTrace();
+            //swallowed exception
         } catch (Exception e) {
-            e.printStackTrace();
+            //swallowed exception
         }
     trustButVerify();
     }
@@ -251,35 +259,28 @@ public class ParchmentActivity extends Activity {
             try {
                 String open_data_string = data.getStringExtra(OPEN_FILENAME);
                 Log.d(TAG, String.format("extra open data found: %s", open_data_string));
-
-                if (!open_data_string.equals(BLANK)) {
-                    pFilename = open_data_string;
-                    Log.d(TAG, String.format("Setting pFilename=%s", open_data_string));
-                    setTitle(open_data_string);
-                    isReadOnly();
-                }
+                pFilename = open_data_string;
+                //setTitle(open_data_string);
+                isReadOnly();
             } catch (NullPointerException npe) {
-                npe.printStackTrace();
+                Toast.makeText(getApplicationContext(), "no file was returned", Toast.LENGTH_SHORT).show();
+                //swallowed exception
             }
-        }
 
-        if (requestCode == 4) {
+        } else if (requestCode == 4) {
             try {
                 String save_data_string = data.getStringExtra(SAVE_FILENAME);
                 Log.d(TAG, String.format("extra save data found: %s", save_data_string));
-
-                if (!save_data_string.equals(BLANK)) {
-                    pFilename = save_data_string;
-                    Log.d(TAG, String.format("Setting pFilename=%s", save_data_string));
-                    setTitle(save_data_string);
-                    pFile = new File(save_data_string);
-                    saveAs();
-                }
+                pFilename = save_data_string;
+                //setTitle(save_data_string);
+                pFile = new File(save_data_string);
+                saveAs();
             } catch (NullPointerException npe) {
                 Toast.makeText(getApplicationContext(), "no file was returned", Toast.LENGTH_SHORT).show();
-                npe.printStackTrace();
+                //swallowed return
             }
-        Log.wtf(TAG, "This shouldn't ever happen ...shit is fucked up");
+        } else {
+            Log.wtf(TAG, "This shouldn't ever happen ...shit is fucked up");
         }
 
     }
@@ -346,20 +347,18 @@ public class ParchmentActivity extends Activity {
 
             if (trust.exists()) {
                 Log.d(TAG, String.format("Trust but verify ... '%s' does in fact exist", pFile_path));
+                if (trust.canRead()) {
+                    Log.d(TAG, "Trust but verify ... we can read " + pFile_path);
+                } else {
+                    Log.d(TAG, "Trust but verify ...failed canRead()");
+                }
+                if (trust.canWrite()) {
+                    Log.d(TAG, "Trust but verify ... we can write " + pFile_path);
+                } else {
+                    Log.d(TAG, "Trust but verify ... failed canWrite()");
+                }
             } else {
                 Log.d(TAG, "Trust but verify ... failed exists()");
-            }
-
-            if (trust.canRead()) {
-                Log.d(TAG, "Trust but verify ... we can read " + pFile_path);
-            } else {
-                Log.d(TAG, "Trust but verify ...failed canRead()");
-            }
-
-            if (trust.canWrite()) {
-                Log.d(TAG, "Trust but verify ... we can write " + pFile_path);
-            } else {
-                Log.d(TAG, "Trust but verify ... failed canWrite()");
             }
         }
     }
