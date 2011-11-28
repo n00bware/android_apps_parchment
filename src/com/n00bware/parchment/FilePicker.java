@@ -79,18 +79,19 @@ public class FilePicker extends ListActivity {
                 String filename_entered = saveFilename.getText().toString();
                 Log.d(TAG, String.format("path detected: %s", filename_entered));
                 if (!filename_entered.equals(BLANK)) {
+                    File path_track = new File (filename_entered);
                     intent = getIntent();
                     intent.putExtra(SAVE_FILENAME, filename_entered);
                     setResult(RESULT_OK, intent);
                     Global.SAVEABLE = true;
-                    Global.PREV_PATH = filename_entered;
+                    Global.PREV_PATH = path_track.getParent();
                     finish();
                 } else {
                     Toast.makeText(getApplicationContext(), no_filename_save_error, Toast.LENGTH_SHORT).show();
                 }
             }
         });
-        Log.d(TAG, Global.PREV_PATH);
+        Log.d(TAG, String.format("Previous path {%s}", Global.PREV_PATH));
         getDir(Global.PREV_PATH);
     }
     
@@ -113,23 +114,28 @@ public class FilePicker extends ListActivity {
             path.add(f.getParent());
         }
 
-        for (int i=0; i < files.length; i++) {
-            File file = files[i];
-            path.add(file.getPath());
+        try {
+            for (int i=0; i < files.length; i++) {
+                File file = files[i];
+                path.add(file.getPath());
 
-            //put list in alphabetic order
-            Collections.sort(item, String.CASE_INSENSITIVE_ORDER);
-            Collections.sort(path, String.CASE_INSENSITIVE_ORDER);
+                //put list in alphabetic order
+                Collections.sort(item, String.CASE_INSENSITIVE_ORDER);
+                Collections.sort(path, String.CASE_INSENSITIVE_ORDER);
 
-            if (file.isDirectory()) {
-                item.add(file.getName() + DIR_MARKER);
-            } else {
-                item.add(file.getName());
+                if (file.isDirectory()) {
+                    item.add(file.getName() + DIR_MARKER);
+                } else {
+                    item.add(file.getName());
+                }
             }
-    	}
 
-        ArrayAdapter<String> fileList = new ArrayAdapter<String>(this, R.layout.row, item);
-        setListAdapter(fileList);
+            ArrayAdapter<String> fileList = new ArrayAdapter<String>(this, R.layout.row, item);
+            setListAdapter(fileList);
+        } catch (NullPointerException npe) {
+            Log.d(TAG, "we experienced a problem with the path");
+        }
+
     }
 
     @Override
@@ -156,7 +162,7 @@ public class FilePicker extends ListActivity {
         } else {
             new AlertDialog.Builder(this)
             .setIcon(R.drawable.files)
-            .setTitle(mMessage)
+            .setTitle(String.format(mMessage, file.getAbsolutePath()))
             .setPositiveButton(mPrompt,
             new DialogInterface.OnClickListener() {
                 @Override
@@ -174,7 +180,7 @@ public class FilePicker extends ListActivity {
 
                     setResult(RESULT_OK, intent);
                     Global.SAVEABLE = true;
-                    Global.PREV_PATH = filename;
+                    Global.PREV_PATH = file.getParent();
                     finish();
                 }
             })
@@ -188,6 +194,7 @@ public class FilePicker extends ListActivity {
     }
 
     public void setStrings() {
+        //decide what strings to show
         if (!Global.SAVEABLE) {
             mPrompt = open_prompt;
             mFileError = file_selection_error_read;
@@ -196,6 +203,12 @@ public class FilePicker extends ListActivity {
             mPrompt = save_prompt;
             mFileError = file_selection_error_write;
             mMessage = save_message;
+        }
+
+        //because we don't want null pointers
+        if ((Global.PREV_PATH == null) || (Global.PREV_PATH.equals(BLANK))) {
+            Global.PREV_PATH = root;
+            Log.d(TAG, String.format("Previous path {%s}", Global.PREV_PATH));
         }
     }
 }
