@@ -48,6 +48,7 @@ public class ParchmentActivity extends Activity {
     private final String SAVE_MARKER = "saved_text";
     private final String LAST_INDEX = "last_index";
     private final String SAVE_ALERT_TITLE = "Save as %s";
+    private final String PARSING_ERROR = "Parsing error while loading ";
     private String pFilename = new String();
     private String textContainer;
     private String pDir;
@@ -186,7 +187,8 @@ public class ParchmentActivity extends Activity {
             Log.d(TAG, "Text found: " + eText.getText().toString());
             reader.close();
         } catch(IOException ioe) {
-            Log.d(TAG, "Parsing error while loading " + pFilename);
+            Log.d(TAG, PARSING_ERROR + pFilename);
+            Toast.makeText(getApplicationContext(), PARSING_ERROR + pFilename, Toast.LENGTH_SHORT).show();
             //swallowed exception
         } catch (Exception e) {
             //swallowed exception

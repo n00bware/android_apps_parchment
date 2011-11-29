@@ -149,19 +149,36 @@ public class FilePicker extends ListActivity {
         final String title = String.format(mFileError, file.getAbsolutePath());
 
         if (file.isDirectory()) {
-            if(file.canWrite()) {
-                getDir(path.get(position));
-            } else {
-                new AlertDialog.Builder(this)
-                .setIcon(R.drawable.open)
-                .setTitle(title)
-                .setPositiveButton("OK", 
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+            if (Global.SAVEABLE) {
+                if(file.canWrite()) {
+                    getDir(path.get(position));
+                } else {
+                    new AlertDialog.Builder(this)
+                    .setIcon(R.drawable.open)
+                    .setTitle(title)
+                    .setPositiveButton("OK",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
 
-                    }
-                }).show();
+                        }
+                    }).show();
+                }
+            } else {
+                if(file.canRead()) {
+                    getDir(path.get(position));
+                } else {
+                    new AlertDialog.Builder(this)
+                    .setIcon(R.drawable.open)
+                    .setTitle(title)
+                    .setPositiveButton("OK",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    }).show();
+                }
             }
         } else {
             new AlertDialog.Builder(this)

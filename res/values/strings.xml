@@ -10,7 +10,7 @@
     <string name="clear">Clear screen</string>
     <string name="empty_text">No Data</string>
     <string name="filename_text">Filename: </string>
-    <string name="new_file_title">Create new file?</string>
+    <string name="new_file_title">Save text to new file?</string>
     <string name="ok">Ok</string>
     <string name="open_button_text">Open</string>
     <string name="ro_fail_notice">Couldn\'t write to that destination</string>
