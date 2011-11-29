@@ -2,9 +2,12 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <string name="app_name">Parchment</string>
+    <string name="default_title">Parchment by n00bware</string>
+    <string name="version_name">Kadeeni Release</string>
+    <string name="splash_label">splash_screen</string>
+
     <string name="cancel">Cancel</string>
     <string name="clear">Clear screen</string>
-    <string name="default_title">Parchment by n00bware</string>
     <string name="empty_text">No Data</string>
     <string name="filename_text">Filename: </string>
     <string name="new_file_title">Create new file?</string>
@@ -14,7 +17,6 @@
     <string name="save">Save</string>
     <string name="save_blank">Can\'t save a blank document</string>
     <string name="save_button_text">Create file</string>
-    <string name="version_name">Riley Release</string>
 
     <string name="prompt_title">{%s}</string>
     <string name="file_selection_error_write">We can\'t write to {%s}</string>

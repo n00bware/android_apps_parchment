@@ -363,18 +363,10 @@ public class ParchmentActivity extends Activity {
         }
     }
 
-    private boolean show_save() {
-        //check if we are @ root or have null file path if so disable
-        //save menu item
-        if ((pFile.getAbsolutePath.equals("/")) || (pFile == null)) {
-            return false;
-        } else {
-            return true;
-        }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
+
+        boolean show_save = pFile.getAbsolutePath().equals("/");
         boolean pick = super.onCreateOptionsMenu(menu);
         menu.add(0, NEW, 0, "New").setIcon(R.drawable.new_file);
         if (show_save) {

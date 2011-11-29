@@ -119,9 +119,13 @@ public class FilePicker extends ListActivity {
                 File file = files[i];
                 path.add(file.getPath());
 
-                //put list in alphabetic order
-                Collections.sort(item, String.CASE_INSENSITIVE_ORDER);
-                Collections.sort(path, String.CASE_INSENSITIVE_ORDER);
+                /* for some reason this seems to sort the list incorrectly
+                 * placing either the item or path asynchronous by one list item
+                 *
+                 * //put list in alphabetic order
+                 * Collections.sort(item, String.CASE_INSENSITIVE_ORDER);
+                 * Collections.sort(path, String.CASE_INSENSITIVE_ORDER);
+                 */
 
                 if (file.isDirectory()) {
                     item.add(file.getName() + DIR_MARKER);
