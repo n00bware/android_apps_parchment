@@ -42,12 +42,12 @@ public class FilePicker extends ListActivity {
     private SharedPreferences mSharedPrefs;
     private TextView myPath;
 
-    private final String prompt_title = "{%s}";
-    private final String file_selection_error_write = "We can't write to {%s}";
-    private final String file_selection_error_read = "We can\'t read {%s}";
+    private final String prompt_title = "[ %s ]";
+    private final String file_selection_error_write = "We can't write to: %s";
+    private final String file_selection_error_read = "We can\'t read: %s";
     private final String save_prompt = "Save as?";
-    private final String save_message = "Save as {%s}";
-    private final String open_message = "Open {%s}";
+    private final String save_message = "Overwrite: %s ?";
+    private final String open_message = "Open: %s";
     private final String open_prompt = "Open?";
     private final String no_filename_save_error = "No filename detected ...Please enter a filename to save";
     private final String location_tracker = "Location: %s";
@@ -91,7 +91,7 @@ public class FilePicker extends ListActivity {
                 }
             }
         });
-        Log.d(TAG, String.format("Previous path {%s}", Global.PREV_PATH));
+        Log.d(TAG, String.format("Previous path %s", Global.PREV_PATH));
         getDir(Global.PREV_PATH);
     }
     
@@ -208,7 +208,7 @@ public class FilePicker extends ListActivity {
         //because we don't want null pointers
         if ((Global.PREV_PATH == null) || (Global.PREV_PATH.equals(BLANK))) {
             Global.PREV_PATH = root;
-            Log.d(TAG, String.format("Previous path {%s}", Global.PREV_PATH));
+            Log.d(TAG, String.format("Previous path %s", Global.PREV_PATH));
         }
     }
 }
