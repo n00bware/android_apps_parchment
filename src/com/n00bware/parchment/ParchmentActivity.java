@@ -115,7 +115,7 @@ public class ParchmentActivity extends Activity {
 
     /* onStart should be called when orentation changes hopefully now we won't lose data from TextEdits this way */
     @Override
-    public void onStart(){
+    public void onStart() {
         super.onStart();
         setContentView(R.layout.main);
 
@@ -262,7 +262,6 @@ public class ParchmentActivity extends Activity {
                 String open_data_string = data.getStringExtra(OPEN_FILENAME);
                 Log.d(TAG, String.format("extra open data found: %s", open_data_string));
                 pFilename = open_data_string;
-                //setTitle(open_data_string);
                 isReadOnly();
             } catch (NullPointerException npe) {
                 Toast.makeText(getApplicationContext(), "no file was returned", Toast.LENGTH_SHORT).show();
@@ -274,7 +273,6 @@ public class ParchmentActivity extends Activity {
                 String save_data_string = data.getStringExtra(SAVE_FILENAME);
                 Log.d(TAG, String.format("extra save data found: %s", save_data_string));
                 pFilename = save_data_string;
-                //setTitle(save_data_string);
                 pFile = new File(save_data_string);
                 saveAs();
             } catch (NullPointerException npe) {
@@ -368,12 +366,9 @@ public class ParchmentActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        boolean show_save = pFile.getAbsolutePath().equals("/");
         boolean pick = super.onCreateOptionsMenu(menu);
         menu.add(0, NEW, 0, "New").setIcon(R.drawable.new_file);
-        if (show_save) {
-            menu.add(0, SAVE, 0, "Save").setIcon(R.drawable.save);
-        }
+        menu.add(0, SAVE, 0, "Save").setIcon(R.drawable.save);
         menu.add(0, SAVE_AS, 0, "Save as").setIcon(R.drawable.save_as);
         menu.add(0, OPEN, 0, "Open").setIcon(R.drawable.open);
         return pick;

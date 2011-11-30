@@ -3,21 +3,33 @@ package com.n00bware.parchment;
  
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
  
 public class SplashScreen extends Activity {
 
-    private static final int SPLASH_DISPLAY_TIME = 2000;  /* 2 seconds */
+    private static final int SPLASH_DISPLAY_TIME = 2500;  /* 2.5 seconds */
     private static final String TAG = "Parchment";
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.splash);
+        //setContentView(R.layout.splash);
         Log.d(TAG, "Splash screen displayed for: " + SPLASH_DISPLAY_TIME);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        setContentView(R.layout.splash);
 
         /* Create a new handler with which to start the main activity
            and close this splash activity after SPLASH_DISPLAY_TIME has
