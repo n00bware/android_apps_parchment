@@ -43,7 +43,7 @@ public class FilePicker extends ListActivity {
     private TextView myPath;
 
     private final String prompt_title = "[ %s ]";
-    private final String file_selection_error_write = "We can't write to: %s";
+  //private final String file_selection_error_write = "We can't write to: %s";
     private final String file_selection_error_read = "We can\'t read: %s";
     private final String save_prompt = "Save as?";
     private final String save_message = "Overwrite: %s ?";
@@ -149,37 +149,21 @@ public class FilePicker extends ListActivity {
         final String title = String.format(mFileError, file.getAbsolutePath());
 
         if (file.isDirectory()) {
-            if (Global.SAVEABLE) {
-                if(file.canWrite()) {
-                    getDir(path.get(position));
-                } else {
-                    new AlertDialog.Builder(this)
-                    .setIcon(R.drawable.open)
-                    .setTitle(title)
-                    .setPositiveButton("OK",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    }).show();
-                }
+            if (file.canRead()) {
+                getDir(path.get(position));
             } else {
-                if(file.canRead()) {
-                    getDir(path.get(position));
-                } else {
-                    new AlertDialog.Builder(this)
-                    .setIcon(R.drawable.open)
-                    .setTitle(title)
-                    .setPositiveButton("OK",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    }).show();
-                }
+                new AlertDialog.Builder(this)
+                .setIcon(R.drawable.open)
+                .setTitle(title)
+                .setPositiveButton("OK",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }).show();
             }
+
+
         } else {
             new AlertDialog.Builder(this)
             .setIcon(R.drawable.files)
@@ -222,7 +206,7 @@ public class FilePicker extends ListActivity {
             mMessage = open_message;
         } else {
             mPrompt = save_prompt;
-            mFileError = file_selection_error_write;
+            mFileError = file_selection_error_read;
             mMessage = save_message;
         }
 
