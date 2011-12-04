@@ -12,6 +12,7 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -20,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -106,11 +108,20 @@ public class ParchmentActivity extends Activity {
 
         pSharedPrefs = getPreferences(MODE_WORLD_WRITEABLE);
         pDir = pSharedPrefs.getString(DIRECTORY, "/");
+
+        //control scrolling
+        //EditText scrollable = (EditText)findViewById(R.id.pDoc);
+        //scrollable.setScroller(new Scroller(ParchmentActivity.this));
+        //scrollable.setVerticalScrollBarEnabled(true);
+        //scrollable.setMovementMethod(new ScrollingMovementMethod());
+
         /*
          * TODO: read only is important but we should look into
          * allowing su save abilities
          */
         isReadOnly();
+
+
     }
 
     /* onStart should be called when orentation changes hopefully now we won't lose data from TextEdits this way */
@@ -129,6 +140,11 @@ public class ParchmentActivity extends Activity {
             EditText contents = (EditText)findViewById(R.id.pDoc);
             contents.setText(pContents);
         }
+
+        //to setup smooth scrolling
+        ScrollView scroll = (ScrollView) findViewById(R.id.main_scrollview);
+        scroll.setSmoothScrollingEnabled(true);
+        scroll.fling(65);
     }
 
     protected void onPause() {
