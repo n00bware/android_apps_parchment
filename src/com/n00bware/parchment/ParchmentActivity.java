@@ -55,6 +55,7 @@ public class ParchmentActivity extends Activity {
     private String textContainer;
     private String pDir;
     private String pContents;
+    private String saved_filename;
 
     private final int NEW = 1;
     private final int SAVE = 2;
@@ -74,7 +75,7 @@ public class ParchmentActivity extends Activity {
         super.onCreate(icicle);
 
         //we want to be sure Global.SAVEABLE =TRUE
-        //then set false when just opening
+        //then set false when we just want to open files
         Global.SAVEABLE = true;
 
         Bundle args = getIntent().getExtras();
@@ -87,10 +88,14 @@ public class ParchmentActivity extends Activity {
             Log.d(TAG, "args: null");
         }
 
-        if ((Global.PREV_PATH == null) || (Global.PREV_PATH.equals(ROOT_DIR))) {
+
+        if (Global.FILENAME == null) {
+            Global.FILENAME = ROOT_DIR;
             setTitle(R.string.default_title);
-            Global.PREV_PATH = ROOT_DIR;
+        } else {
+            setTitle(Global.FILENAME);
         }
+        Log.d(TAG, "Global.FILENAME " + Global.FILENAME);
 
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
@@ -109,12 +114,6 @@ public class ParchmentActivity extends Activity {
         pSharedPrefs = getPreferences(MODE_WORLD_WRITEABLE);
         pDir = pSharedPrefs.getString(DIRECTORY, "/");
 
-        //control scrolling
-        //EditText scrollable = (EditText)findViewById(R.id.pDoc);
-        //scrollable.setScroller(new Scroller(ParchmentActivity.this));
-        //scrollable.setVerticalScrollBarEnabled(true);
-        //scrollable.setMovementMethod(new ScrollingMovementMethod());
-
         /*
          * TODO: read only is important but we should look into
          * allowing su save abilities
@@ -129,11 +128,7 @@ public class ParchmentActivity extends Activity {
     public void onStart() {
         super.onStart();
         setContentView(R.layout.main);
-
-        if ((Global.PREV_PATH == null) || (Global.PREV_PATH.equals(ROOT_DIR))) {
-            setTitle(R.string.default_title);
-            Global.PREV_PATH = ROOT_DIR;
-        }
+        Log.d(TAG, "onStart");
 
         pContents = pSharedPrefs.getString(SAVE_MARKER, BLANK);
         if (!pContents.equals(BLANK)) {
@@ -278,9 +273,12 @@ public class ParchmentActivity extends Activity {
                 String open_data_string = data.getStringExtra(OPEN_FILENAME);
                 Log.d(TAG, String.format("extra open data found: %s", open_data_string));
                 pFilename = open_data_string;
+                Global.FILENAME = open_data_string;
                 isReadOnly();
             } catch (NullPointerException npe) {
                 Toast.makeText(getApplicationContext(), "no file was returned", Toast.LENGTH_SHORT).show();
+                //swallowed exception
+            } catch (Exception e) {
                 //swallowed exception
             }
 
@@ -290,11 +288,15 @@ public class ParchmentActivity extends Activity {
                 Log.d(TAG, String.format("extra save data found: %s", save_data_string));
                 pFilename = save_data_string;
                 pFile = new File(save_data_string);
+                Global.FILENAME = save_data_string;
                 saveAs();
             } catch (NullPointerException npe) {
                 Toast.makeText(getApplicationContext(), "no file was returned", Toast.LENGTH_SHORT).show();
-                //swallowed return
+                //swallowed exeption
+            } catch (Exception e) {
+                //swallowed exeption
             }
+
         } else {
             Log.wtf(TAG, "This shouldn't ever happen ...shit is fucked up");
         }
